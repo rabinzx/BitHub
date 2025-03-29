@@ -7,12 +7,31 @@ import Header from './components/Header'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [nonce, setNonce] = useState("");
 
   useEffect(() => {
     fetch("/api/sayhello")
       .then((res) => console.log("API Response:", res))
       .catch((err) => console.error("API Error:", err));
   }, []);
+
+  useEffect(() => {
+    fetch("/api/nonce")
+      .then((res) => res.json())
+      .then((data) => setNonce(data.nonce));
+  }, []);
+
+  useEffect(() => {
+    if (nonce) {
+      console.log("Nonce:", nonce);
+      // const analytics = Analytics({
+      //   trackingId: "UA-XXXXXXX-X",
+      //   nonce: nonce,  // Pass the nonce here
+      // });
+
+      //analytics.page();
+    }
+  }, [nonce]);
 
   return (
     <>

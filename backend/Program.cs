@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -47,8 +49,26 @@ var summaries = new[]
 // })
 // .WithName("GetWeatherForecast")
 // .WithOpenApi();
+
+app.Use(async (context, next) =>
+{
+    Debug.WriteLine("CSP Middleware: Adding Content-Security-Policy header.");
+    string nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+    context.Items["CSP-Nonce"] = nonce;
+    context.Response.Headers.Append("Content-Security-Policy", 
+        $"default-src 'self'; script-src 'self' 'nonce-{nonce}' https://apis.google.com; style-src 'self' 'nonce-{nonce}';");
+
+    await next();
+});
+
 app.MapGet("/", () => "ASP.NET 8 API Home Page!");
-app.MapGet("/api/sayhello", () => "Hello from ASP.NET 8 API!");
+
+// This endpoint returns a nonce value that can be used in the CSP header for inline scripts
+app.MapGet("/api/nonce", (HttpContext context) => {
+    return Results.Json(new { nonce = context.Items["CSP-Nonce"] });
+});
+
+app.MapGet("/api/sayhello", () => Results.Json(new {msg = "Hello from ASP.NET 8 API!"}));
 
 app.Run();
 
