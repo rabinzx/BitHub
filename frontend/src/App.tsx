@@ -3,15 +3,14 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { Routes, Route } from "react-router-dom";
 import './App.css'
-import Header from './components/Header';
-import InputComponent from './components/InputComponent';
+import MainCanvas from './pages/MainCanvas';
 
 function App() {
   const [count, setCount] = useState(0)
   const [nonce, setNonce] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const [firstName, setFirstName] = useState("John" as string | number);
+
 
   const sidebarOpenHandler = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -85,18 +84,11 @@ function App() {
             This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.
           </p>
 
-          <div className=''>
-            {/* Input Component */}
-            <InputComponent inputType="text" inputValue={firstName} onChange={(_firstName) => setFirstName(_firstName)} />
-            {firstName}
-          </div>
+          {/* Main Canvas Page */}
+          <MainCanvas />
 
         </main>
 
-        {/* Routes for different components */}
-        <Routes>
-          <Route path="/header" element={<Header />} />
-        </Routes>
       </div>
       {/* Footer */}
       <footer className="flex-shrink-0 bg-blue-600 text-white text-center p-3 ">
