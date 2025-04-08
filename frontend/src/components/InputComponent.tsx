@@ -1,11 +1,14 @@
 import { useEffect, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
-
+import { FieldError, FieldErrorsImpl, FieldValues, Merge, UseFormRegister } from "react-hook-form";
 
 interface ButtonProps {
     type: string;
     value: string | number;
     onChange: (value: string | number) => void;
+    register?: UseFormRegister<FieldValues>;
+    error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
+    name?: string;
 }
 
 interface maskState {
@@ -17,8 +20,35 @@ interface maskState {
 const InputComponent: React.FC<ButtonProps> = (props) => {
     const [inputValue, setInputValue] = useState(props.value || '');
 
+    const phoneRule = {
+        required: "Phone number is required",
+        pattern: {
+            value: /^\(\d{3}\)\s\d{3}-\d{4}$/,
+            message: "Invalid phone format",
+        },
+    }
+
+    const dateRule = {
+        required: "Date is required",
+        pattern: {
+            value: /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/,
+            message: "Invalid date format (MM/dd/yyyy)",
+        }
+    }
+
+
     const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
+
+        if (typeof props.value === "number") {
+            if (props.type === 'integer') {
+                props.onChange(parseInt(event.target.value, 10));
+            } else if (props.type === 'decimal') {
+                props.onChange(parseFloat(event.target.value));
+            }
+            return;
+        }
+
         props.onChange(event.target.value); // Call the onChange prop with the new value        
     };
 
@@ -43,6 +73,7 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
     return (
         // <form onSubmit={handleSubmit} className="flex flex-col items-center mt-4"></form>
         <>
+
             {
                 props.type === 'text' &&
                 <input type="text" value={inputValue} onChange={inputChangeHandler} />
@@ -51,7 +82,7 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
             {
                 props.type === 'integer' &&
                 <InputMask
-                    mask="99999999999"
+                    mask="999"
                     value={inputValue}
                     onChange={inputChangeHandler}
                 />
@@ -70,6 +101,33 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
                     onChange={inputChangeHandler}
                     beforeMaskedStateChange={beforeMaskedStateChange}
                 />
+            }
+
+            {
+                props.type === 'date' &&
+                <div>
+                    <InputMask
+                        mask="99/99/9999"
+                        {...props.register!(props.name!, dateRule)}
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                    />
+                    {props.error && <p>{String(props.error)}</p>}
+                </div>
+            }
+
+            {
+                props.type === 'phone' &&
+                <div>
+                    <InputMask
+                        mask="(999) 999-9999"
+                        {...props.register!(props.name!, phoneRule)}
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                    />
+                    {props.error && <p>{String(props.error)}</p>}
+                </div>
+
             }
         </>
     );
