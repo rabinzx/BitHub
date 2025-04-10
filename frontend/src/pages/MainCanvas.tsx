@@ -48,7 +48,7 @@ const MainCanvas = () => {
                     {/* Input Component */}
                     <label htmlFor="" className="text-xl font-bold">Input Type: Integer</label>
                     <div>
-                        <InputComponent type="integer" value={String(person.age)} onChange={(_age) => updatePerson('age', _age)} />
+                        <InputComponent type="integer" register={register} error={errors.age?.message} name="age" value={person.age} onChange={(_age) => updatePerson('age', _age)} />
                         <p className="text-xl">Age: {person.age}</p>
                     </div>
                 </div>
@@ -57,7 +57,7 @@ const MainCanvas = () => {
                     {/* Input Component */}
                     <label htmlFor="" className="text-xl font-bold">Input Type: decimal</label>
                     <div>
-                        <InputComponent type="decimal" value={person.heightInFeet} onChange={(_heightInFeet) => updatePerson('heightInFeet', _heightInFeet)} />
+                        <InputComponent type="decimal" register={register} error={errors.height?.message} name="height" value={person.heightInFeet} onChange={(_heightInFeet) => updatePerson('heightInFeet', _heightInFeet)} />
                         <p className="text-xl">Height (ft): {person.heightInFeet}</p>
                     </div>
                 </div>

@@ -1,6 +1,13 @@
 import { useEffect, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
 import { FieldError, FieldErrorsImpl, FieldValues, Merge, UseFormRegister } from "react-hook-form";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+// Use customParseFormat plugin to parse "02/29/2023" as a invalid date
+dayjs.extend(customParseFormat);
+dayjs.extend(isBetween);
 
 interface ButtonProps {
     type: string;
@@ -20,7 +27,15 @@ interface maskState {
 const InputComponent: React.FC<ButtonProps> = (props) => {
     const [inputValue, setInputValue] = useState(props.value || '');
 
-    const phoneRule = {
+    const formRuleInteger = {
+        required: "This field is required",
+        pattern: {
+            value: /^-?\d+$/, // matches positive or negative integers
+            message: "Must be a valid integer",
+        },
+    }
+
+    const formRulePhone = {
         required: "Phone number is required",
         pattern: {
             value: /^\(\d{3}\)\s\d{3}-\d{4}$/,
@@ -28,28 +43,39 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
         },
     }
 
-    const dateRule = {
+    const formRuleDate = {
         required: "Date is required",
-        pattern: {
-            value: /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/,
-            message: "Invalid date format (MM/dd/yyyy)",
-        }
-    }
+        validate: (value: string) => {
+            const format = "MM/DD/YYYY";
+            const parsed = dayjs(value, format, true); // strict parsing
 
+            if (!parsed.isValid()) {
+                return "Invalid date format or value";
+            }
+
+            const minDate = dayjs("01/01/1900", format);
+            const maxDate = dayjs("12/31/2200", format);
+
+            if (!parsed.isBetween(minDate, maxDate, null, '[]')) {
+                return "Date must be between 01/01/1900 and 12/31/2200";
+            }
+
+            return true;
+        }
+    };
 
     const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
+        let tempVal: number | string = event.target.value;
 
         if (typeof props.value === "number") {
             if (props.type === 'integer') {
-                props.onChange(parseInt(event.target.value, 10));
+                tempVal = parseInt(event.target.value, 10)
             } else if (props.type === 'decimal') {
-                props.onChange(parseFloat(event.target.value));
+                tempVal = Number(parseFloat(event.target.value).toFixed(2));
             }
-            return;
         }
-
-        props.onChange(event.target.value); // Call the onChange prop with the new value        
+        setInputValue(tempVal);
+        props.onChange(tempVal);
     };
 
     // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -81,16 +107,18 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
 
             {
                 props.type === 'integer' &&
-                <InputMask
-                    mask="999"
-                    value={inputValue}
-                    onChange={inputChangeHandler}
-                />
+                <div>
+                    <input type="number" {...props.register!(props.name!, formRuleInteger)} step="1" value={inputValue} onChange={inputChangeHandler} />
+                    {props.error && <p>{String(props.error)}</p>}
+                </div>
             }
 
             {
                 props.type === 'decimal' &&
-                <input type='number' value={inputValue} onChange={inputChangeHandler} step="any" />
+                <div>
+                    <input type="number" {...props.register!(props.name!, formRuleInteger)} step="0.01" value={inputValue} onChange={inputChangeHandler} />
+                    {props.error && <p>{String(props.error)}</p>}
+                </div>
             }
 
             {
@@ -100,7 +128,9 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
                     value={inputValue}
                     onChange={inputChangeHandler}
                     beforeMaskedStateChange={beforeMaskedStateChange}
-                />
+                >
+                    <input type="text" placeholder='99999-9999' />
+                </InputMask>
             }
 
             {
@@ -108,10 +138,12 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
                 <div>
                     <InputMask
                         mask="99/99/9999"
-                        {...props.register!(props.name!, dateRule)}
+                        {...props.register!(props.name!, formRuleDate)}
                         value={inputValue}
                         onChange={inputChangeHandler}
-                    />
+                    >
+                        <input type="tel" placeholder='MM/dd/yyyy' />
+                    </InputMask>
                     {props.error && <p>{String(props.error)}</p>}
                 </div>
             }
@@ -121,10 +153,12 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
                 <div>
                     <InputMask
                         mask="(999) 999-9999"
-                        {...props.register!(props.name!, phoneRule)}
+                        {...props.register!(props.name!, formRulePhone)}
                         value={inputValue}
                         onChange={inputChangeHandler}
-                    />
+                    >
+                        <input type="tel" placeholder='(999) 999-9999' />
+                    </InputMask>
                     {props.error && <p>{String(props.error)}</p>}
                 </div>
 
