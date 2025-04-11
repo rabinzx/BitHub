@@ -1,6 +1,6 @@
 import { useEffect, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
-import { FieldError, FieldErrorsImpl, FieldValues, Merge, UseFormRegister } from "react-hook-form";
+import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -9,13 +9,19 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 
-interface ButtonProps {
+interface Dictionary {
+    [key: string]: string | number;
+}
+
+interface InputProps {
     type: string;
-    value: string | number;
-    onChange: (value: string | number) => void;
+    value: string | number | boolean;
+    onChange: (value: string | number | boolean) => void;
     register?: UseFormRegister<FieldValues>;
-    error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
-    name?: string;
+    errors?: FieldErrors<FieldValues>;
+    name: string;
+    matchValue?: string;
+    multipleOptions?: Dictionary;
 }
 
 interface maskState {
@@ -24,8 +30,8 @@ interface maskState {
         selection: { start: number; end: number };
     }
 }
-const InputComponent: React.FC<ButtonProps> = (props) => {
-    const [inputValue, setInputValue] = useState(props.value || '');
+const InputComponent: React.FC<InputProps> = (props) => {
+    const [inputValue, setInputValue] = useState(props.value);
 
     const formRuleInteger = {
         required: "This field is required",
@@ -33,6 +39,16 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
             value: /^-?\d+$/, // matches positive or negative integers
             message: "Must be a valid integer",
         },
+    }
+
+    const formRuleDecimal = {
+        required: "This field is required",
+        validate: (value: string) => {
+            const parsed = parseFloat(value);
+            if (isNaN(parsed)) {
+                return "Must be a valid number";
+            }
+        }
     }
 
     const formRulePhone = {
@@ -64,25 +80,33 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
         }
     };
 
-    const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-        let tempVal: number | string = event.target.value;
-
-        if (typeof props.value === "number") {
-            if (props.type === 'integer') {
-                tempVal = parseInt(event.target.value, 10)
-            } else if (props.type === 'decimal') {
-                tempVal = Number(parseFloat(event.target.value).toFixed(2));
+    const formPasswordRule = {
+        required: "This field is required",
+        validate: (value: string) => {
+            if (props.matchValue && value !== props.matchValue) {
+                return "Password does not match";
             }
         }
+    };
+
+    const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let tempVal: number | string | boolean = event.target.value;
+
+        if (props.type === 'integer') {
+            tempVal = parseInt(event.target.value, 10)
+            if (isNaN(tempVal as number)) return;
+        }
+        else if (props.type === 'decimal') {
+            tempVal = Number(parseFloat(event.target.value).toFixed(2));
+            if (isNaN(tempVal as number)) return;
+        }
+        else if (props.type === 'checkbox') {
+            tempVal = event.target.checked;
+        }
+
         setInputValue(tempVal);
         props.onChange(tempVal);
     };
-
-    // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    //     event.preventDefault();
-    //     console.log('Submitted value:', inputValue);
-    //     // Here you can add logic to send the input value to the server or perform any other action
-    // };
 
     const beforeMaskedStateChange = ({ nextState }: maskState) => {
         let { value } = nextState;
@@ -97,28 +121,22 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
     }
 
     return (
-        // <form onSubmit={handleSubmit} className="flex flex-col items-center mt-4"></form>
-        <>
-
+        <div>
             {
                 props.type === 'text' &&
-                <input type="text" value={inputValue} onChange={inputChangeHandler} />
+                <input type="text" value={inputValue as string} onChange={inputChangeHandler} />
             }
 
             {
                 props.type === 'integer' &&
-                <div>
-                    <input type="number" {...props.register!(props.name!, formRuleInteger)} step="1" value={inputValue} onChange={inputChangeHandler} />
-                    {props.error && <p>{String(props.error)}</p>}
-                </div>
+                <input type="number" {...props.register!(props.name, formRuleInteger)}
+                    step="1" value={inputValue as number} onChange={inputChangeHandler} />
             }
 
             {
                 props.type === 'decimal' &&
-                <div>
-                    <input type="number" {...props.register!(props.name!, formRuleInteger)} step="0.01" value={inputValue} onChange={inputChangeHandler} />
-                    {props.error && <p>{String(props.error)}</p>}
-                </div>
+                <input type="number" {...props.register!(props.name, formRuleDecimal)}
+                    step="0.01" value={inputValue as number} onChange={inputChangeHandler} />
             }
 
             {
@@ -135,35 +153,65 @@ const InputComponent: React.FC<ButtonProps> = (props) => {
 
             {
                 props.type === 'date' &&
-                <div>
-                    <InputMask
-                        mask="99/99/9999"
-                        {...props.register!(props.name!, formRuleDate)}
-                        value={inputValue}
-                        onChange={inputChangeHandler}
-                    >
-                        <input type="tel" placeholder='MM/dd/yyyy' />
-                    </InputMask>
-                    {props.error && <p>{String(props.error)}</p>}
-                </div>
+                <InputMask
+                    mask="99/99/9999"
+                    {...props.register!(props.name, formRuleDate)}
+                    value={inputValue}
+                    onChange={inputChangeHandler}
+                >
+                    <input type="tel" placeholder='MM/dd/yyyy' />
+                </InputMask>
             }
 
             {
                 props.type === 'phone' &&
-                <div>
-                    <InputMask
-                        mask="(999) 999-9999"
-                        {...props.register!(props.name!, formRulePhone)}
-                        value={inputValue}
-                        onChange={inputChangeHandler}
-                    >
-                        <input type="tel" placeholder='(999) 999-9999' />
-                    </InputMask>
-                    {props.error && <p>{String(props.error)}</p>}
-                </div>
-
+                <InputMask
+                    mask="(999) 999-9999"
+                    {...props.register!(props.name, formRulePhone)}
+                    value={inputValue}
+                    onChange={inputChangeHandler}
+                >
+                    <input type="tel" placeholder='(999) 999-9999' />
+                </InputMask>
             }
-        </>
+
+            {
+                props.type === 'checkbox' &&
+                <input type="checkbox" checked={inputValue as boolean} onChange={inputChangeHandler} />
+            }
+
+            {
+                props.type === 'password' &&
+                <input type="password" {...props.register!(props.name, formPasswordRule)}
+                    placeholder='*********' value={inputValue as string} onChange={inputChangeHandler} />
+            }
+
+            {
+                props.type === 'radio' &&
+                <div>
+                    {Object.entries(props.multipleOptions!).map(([key, value]) => (
+                        <label key={key}>
+                            <input
+                                type="radio"
+                                value={key}
+                                name={props.name}
+                                checked={inputValue === key}
+                                onChange={inputChangeHandler}
+                            />
+                            {value}
+                        </label>
+                    ))}
+
+                </div>
+            }
+
+
+            {props.errors &&
+                props.errors[props.name] &&
+                <div className='mt-2'>{String(props.errors[props.name]!.message)}</div>
+            }
+
+        </div>
     );
 }
 
