@@ -1,13 +1,58 @@
 @import "tailwindcss";
 
+@theme {
+  --breakpoint-3xl: 1920px;
+  
+  /* Colors */
+  --color-primary: oklch(0.99 0 0);
+  --color-primary: #4f46e5;         /* Indigo */
+  --color-primary-light: #6366f1;
+  --color-secondary: #10b981;       /* Emerald */
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-error: #ef4444;
+
+  /* Typography */
+  --font-family-sans: 'Inter', 'Segoe UI', sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Z-index */
+  --z-index-dropdown: 1000;
+  --z-index-modal: 1100;
+  --z-index-toast: 1200;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-medium: 300ms ease-in-out;
+
+  /* ... */
+}
+
 :root {
+  /* Default theme setup is dark mode, use media query to overwrite */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   
   color-scheme: light dark;
-  color: #4f46e5;
-  background-color: #ffffff;
+  color: var(--color-primary);
+  background: var(--color-muted);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -17,11 +62,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--color-primary-light);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--color-primary)
 }
 
 body {
@@ -39,12 +84,12 @@ h1 {
 
 input {
   border-radius: 8px;
-  border: 1px solid #a9a9a9;
+  border: 1px solid var(--color-border);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #f9f9f9;
+  background-color: var(--color-background);
   transition: border-color 0.25s;
 }
 
@@ -55,12 +100,12 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
+  background: var(--color-primary);
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  background: var(--color-primary-light);
 }
 button:focus,
 button:focus-visible {
@@ -69,13 +114,14 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--color-text);
+    background: var(--color-surface);
   }
   a:hover {
-    color: #747bff;
+    color: var(--color-primary);
   }
   button {
-    background-color: #f9f9f9;
+    background: var(--color-surface);
   }
 }
+
