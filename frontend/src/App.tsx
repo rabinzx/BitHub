@@ -53,12 +53,11 @@ function App() {
       </header>
 
       {/* Layout Wrapper */}
-      <div className="flex flex-[1_0_auto]" >
+      <div className="flex flex-1" >
         {/* Sidebar */}
         <aside
-          className={`bg-gray-800 text-white w-[300px] flex-shrink-0 transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-          relative z-50`}
+          className={`bg-gray-800 text-white relative z-50 w-[250px] flex-shrink-0 transform transition-transform duration-250 ease-in-out
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <nav className="space-y-4">
             <a href="#" className="block p-2 hover:bg-gray-700 rounded">
@@ -76,22 +75,17 @@ function App() {
           </nav>
         </aside>
 
-
         {/* Main Content */}
-        <main className={`flex-1 ${isSidebarOpen ? "ml-[0px]" : "-ml-[300px]"}  transition-all duration-300 p-6 bg-gray-100`}>
+        <main className={`flex-1 transition-all duration-250 p-6 bg-gray-100 -ml-[250px] ${isSidebarOpen && "md:ml-0"}`}>
           <h2 className="text-2xl font-bold mb-4">Welcome to My Landing Page</h2>
           <p className="text-gray-700">
-            This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.This is a fully responsive landing page with a top header, left sidebar, and sticky footer.
+            This is a fully responsive landing page with a top header, left sidebar, and sticky footer.
           </p>
 
-          <button className="text-white">
-            Click Me
-          </button>
           {/* Main Canvas Page */}
-          {/* <MainCanvas /> */}
+          <MainCanvas />
 
         </main>
-
       </div>
       {/* Footer */}
       <footer className="flex-shrink-0 bg-blue-600 text-white text-center p-3 ">
