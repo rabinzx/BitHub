@@ -4,6 +4,7 @@ import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import rules, { getFileSizeMB } from '../InputRules';
 
 // Use customParseFormat plugin to parse "02/29/2023" as a invalid date
 dayjs.extend(customParseFormat);
@@ -15,13 +16,14 @@ interface Dictionary {
 
 interface InputProps {
     type: string;
-    value: string | number | boolean;
+    value: string | number | boolean | File | null;
     onChange: (value: string | number | boolean) => void;
     register?: UseFormRegister<FieldValues>;
     errors?: FieldErrors<FieldValues>;
     name: string;
     matchValue?: string;
     multipleOptions?: Dictionary;
+    fileType?: string;
 }
 
 interface maskState {
@@ -30,64 +32,11 @@ interface maskState {
         selection: { start: number; end: number };
     }
 }
+
 const InputComponent: React.FC<InputProps> = (props) => {
+    const maxFileSizeMB = 1; // in MB
     const [inputValue, setInputValue] = useState(props.value);
-
-    const formRuleInteger = {
-        required: "This field is required",
-        pattern: {
-            value: /^-?\d+$/, // matches positive or negative integers
-            message: "Must be a valid integer",
-        },
-    }
-
-    const formRuleDecimal = {
-        required: "This field is required",
-        validate: (value: string) => {
-            const parsed = parseFloat(value);
-            if (isNaN(parsed)) {
-                return "Must be a valid number";
-            }
-        }
-    }
-
-    const formRulePhone = {
-        required: "Phone number is required",
-        pattern: {
-            value: /^\(\d{3}\)\s\d{3}-\d{4}$/,
-            message: "Invalid phone format",
-        },
-    }
-
-    const formRuleDate = {
-        required: "Date is required",
-        validate: (value: string) => {
-            const format = "MM/DD/YYYY";
-            const parsed = dayjs(value, format, true); // strict parsing
-
-            if (!parsed.isValid()) {
-                return "Invalid date format or value";
-            }
-
-            const minDate = dayjs("01/01/1900", format);
-            const maxDate = dayjs("12/31/2200", format);
-
-            if (!parsed.isBetween(minDate, maxDate, null, '[]')) {
-                return "Date must be between 01/01/1900 and 12/31/2200";
-            }
-
-            return true;
-        }
-    };
-
-    const formPasswordRule = {
-        required: "This field is required",
-        validate: (value: string) => {
-            if (props.matchValue && value !== props.matchValue) {
-                return "Password does not match";
-            }
-        }
-    };
+    const [dragActive, setDragActive] = useState(false);
 
     const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         let tempVal: number | string | boolean = event.target.value;
@@ -103,9 +52,52 @@ const InputComponent: React.FC<InputProps> = (props) => {
         else if (props.type === 'checkbox') {
             tempVal = event.target.checked;
         }
+        else if (props.type === 'file') {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            inputFileHandler(file);
+            return;
+        }
 
         setInputValue(tempVal);
         props.onChange(tempVal);
+    };
+
+    const inputFileHandler = (file: File) => {
+        if (!file) return;
+
+        if (getFileSizeMB(file.size) > maxFileSizeMB) {
+            alert(`File size exceeds ${maxFileSizeMB} MB`);
+            return;
+        }
+
+        const reader = new FileReader();
+        // callback function 
+        reader.onload = () => {
+            setInputValue(reader.result as string);
+            props.onChange(reader.result as string);
+        };
+        reader.onerror = () => {
+            alert("File reading failed");
+            reader.abort();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setDragActive(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) inputFileHandler(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setDragActive(true);
+    };
+
+    const handleDragLeave = () => {
+        setDragActive(false);
     };
 
     const beforeMaskedStateChange = ({ nextState }: maskState) => {
@@ -129,13 +121,13 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
             {
                 props.type === 'integer' &&
-                <input type="number" {...props.register!(props.name, formRuleInteger)}
+                <input type="number" {...props.register!(props.name, rules.integer)}
                     step="1" value={inputValue as number} onChange={inputChangeHandler} />
             }
 
             {
                 props.type === 'decimal' &&
-                <input type="number" {...props.register!(props.name, formRuleDecimal)}
+                <input type="number" {...props.register!(props.name, rules.decimal)}
                     step="0.01" value={inputValue as number} onChange={inputChangeHandler} />
             }
 
@@ -155,7 +147,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 props.type === 'date' &&
                 <InputMask
                     mask="99/99/9999"
-                    {...props.register!(props.name, formRuleDate)}
+                    {...props.register!(props.name, rules.date)}
                     value={inputValue}
                     onChange={inputChangeHandler}
                 >
@@ -167,7 +159,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 props.type === 'phone' &&
                 <InputMask
                     mask="(999) 999-9999"
-                    {...props.register!(props.name, formRulePhone)}
+                    {...props.register!(props.name, rules.phone)}
                     value={inputValue}
                     onChange={inputChangeHandler}
                 >
@@ -182,7 +174,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
             {
                 props.type === 'password' &&
-                <input type="password" {...props.register!(props.name, formPasswordRule)}
+                <input type="password" {...props.register!(props.name, props.matchValue ? rules.passwordMatch(props.matchValue!) : rules.password)}
                     placeholder='*********' value={inputValue as string} onChange={inputChangeHandler} />
             }
 
@@ -190,21 +182,37 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 props.type === 'radio' &&
                 <div>
                     {Object.entries(props.multipleOptions!).map(([key, value]) => (
-                        <label key={key}>
+                        <label key={key} className='mr-2'>
                             <input
                                 type="radio"
                                 value={key}
-                                name={props.name}
+                                {...props.register!(props.name, rules.radio)}
                                 checked={inputValue === key}
                                 onChange={inputChangeHandler}
                             />
                             {value}
                         </label>
                     ))}
-
                 </div>
             }
 
+            {props.type === 'file' &&
+                <div
+                    onClick={() => document.querySelector(`input[name="${props.name}"]`)?.click()}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                        }`}
+                    style={{ position: 'relative' }}
+                >
+                    <input type="file" className='w-[300px]' style={{ position: 'absolute', top: '0.5rem', left: '0.5rem' }} accept={props.fileType || 'image/*'}
+                        {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
+                    <p className="text-gray-700 className='flex-1'">
+                        Drag & drop a file here, or click to select.
+                    </p>
+                </div>
+            }
 
             {props.errors &&
                 props.errors[props.name] &&

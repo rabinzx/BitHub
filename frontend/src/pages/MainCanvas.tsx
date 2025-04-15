@@ -11,9 +11,10 @@ const MainCanvas = () => {
         dob: '01/01/1990',
         phone: '(123) 456-7890',
         married: false,
-        secret: 'sdfj^hjd&23#s!',
+        secret: 'sdfj^hGjd&23#s!',
         confirmSecret: '',
-        gender: 'zzz'
+        gender: 'male',
+        file: null
     });
 
     const genderOptions = {
@@ -145,6 +146,14 @@ const MainCanvas = () => {
                     </div>
                 </div>
 
+                <div className="mt-4">
+                    {/* create input file upload component */}
+                    <label htmlFor="" className="text-xl font-bold">Input Type: file</label>
+                    <div>
+                        <InputComponent type="file" register={register} errors={errors} name="file" value={person.file} onChange={(val) => updatePerson('file', val)} />
+                        <img src={person.file ?? undefined} style={{ 'height': '250px' }} />
+                    </div>
+                </div>
 
                 <div className="mt-4">
                     <button type="submit" >Submit</button>
