@@ -4,7 +4,6 @@
   --breakpoint-3xl: 1920px;
   
   /* Colors */
-  --color-primary: oklch(0.99 0 0);
   --color-primary: #4f46e5;         /* Indigo */
   --color-primary-light: #6366f1;
   --color-secondary: #10b981;       /* Emerald */

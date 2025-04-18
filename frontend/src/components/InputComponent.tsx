@@ -53,6 +53,9 @@ const InputComponent: React.FC<InputProps> = (props) => {
             tempVal = event.target.checked;
         }
         else if (props.type === 'file') {
+
+            console.log('file input clicked');
+
             const file = event.target.files?.[0];
             if (!file) return;
             inputFileHandler(file);
@@ -198,17 +201,16 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
             {props.type === 'file' &&
                 <div
-                    onClick={() => document.querySelector(`input[name="${props.name}"]`)?.click()}
+                    onClick={(e) => { console.log('div clicked'); }}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
-                    className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-                        }`}
+                    className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
                     style={{ position: 'relative' }}
                 >
-                    <input type="file" className='w-[300px]' style={{ position: 'absolute', top: '0.5rem', left: '0.5rem' }} accept={props.fileType || 'image/*'}
+                    <input type="file" className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
                         {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
-                    <p className="text-gray-700 className='flex-1'">
+                    <p className="text-muted">
                         Drag & drop a file here, or click to select.
                     </p>
                 </div>
