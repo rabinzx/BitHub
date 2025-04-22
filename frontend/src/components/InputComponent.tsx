@@ -1,4 +1,4 @@
-import { useEffect, useState, } from 'react'
+import { useEffect, useRef, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
 import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 import dayjs from "dayjs";
@@ -24,6 +24,8 @@ interface InputProps {
     matchValue?: string;
     multipleOptions?: Dictionary;
     fileType?: string;
+    layout?: string;
+    containerClass?: string;
 }
 
 interface maskState {
@@ -33,10 +35,19 @@ interface maskState {
     }
 }
 
+enum LayoutDirections {
+    Col = "flex-col",
+    Row = "flex-row",
+};
+
 const InputComponent: React.FC<InputProps> = (props) => {
     const maxFileSizeMB = 1; // in MB
     const [inputValue, setInputValue] = useState(props.value);
     const [dragActive, setDragActive] = useState(false);
+    const sanatizedName = props.name.replace(/[^a-zA-Z0-9]/g, "_"); // Sanitize name to be a valid HTML id
+    const layout = props.layout && Object.keys(LayoutDirections).includes(props.layout as LayoutDirections)
+        ? LayoutDirections[props.layout as keyof typeof LayoutDirections]
+        : LayoutDirections.Row;
 
     const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         let tempVal: number | string | boolean = event.target.value;
@@ -116,15 +127,16 @@ const InputComponent: React.FC<InputProps> = (props) => {
     }
 
     return (
-        <div>
+        <div className={`flex justify-center items-center ${layout} ${props.containerClass}`}>
+            <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'mb-2' : 'mr-2'}`} htmlFor={sanatizedName}>{sanatizedName}</label>
             {
                 props.type === 'text' &&
-                <input type="text" value={inputValue as string} onChange={inputChangeHandler} />
+                <input type="text" id={sanatizedName} value={inputValue as string} onChange={inputChangeHandler} />
             }
 
             {
                 props.type === 'integer' &&
-                <input type="number" {...props.register!(props.name, rules.integer)}
+                <input type="number" id={sanatizedName} {...props.register!(props.name, rules.integer)}
                     step="1" value={inputValue as number} onChange={inputChangeHandler} />
             }
 
@@ -172,7 +184,26 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
             {
                 props.type === 'checkbox' &&
-                <input type="checkbox" checked={inputValue as boolean} onChange={inputChangeHandler} />
+                <div className="flex gap-2">
+                    <input type="checkbox" className="peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
+                        focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100
+                        checked:bg-primary-light checked:border-0
+                        disabled:border-steel-400 disabled:bg-steel-400"
+                        checked={inputValue as boolean} onChange={inputChangeHandler} />
+                    <svg
+                        className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+
+                </div>
             }
 
             {
@@ -183,25 +214,28 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
             {
                 props.type === 'radio' &&
-                <div>
+                <div className='flex gap-2'>
                     {Object.entries(props.multipleOptions!).map(([key, value]) => (
-                        <label key={key} className='mr-2'>
+                        <div key={key} className='flex gap-2 items-center'>
                             <input
                                 type="radio"
+                                id={`radio-${props.name}-${key}`}
                                 value={key}
+                                className='appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light'
                                 {...props.register!(props.name, rules.radio)}
                                 checked={inputValue === key}
                                 onChange={inputChangeHandler}
                             />
-                            {value}
-                        </label>
+                            <label className='mr-2' htmlFor={`radio-${props.name}-${key}`} >
+                                {value}
+                            </label>
+                        </div>
                     ))}
                 </div>
             }
 
             {props.type === 'file' &&
                 <div
-                    onClick={(e) => { console.log('div clicked'); }}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -211,7 +245,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     <input type="file" className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
                         {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
                     <p className="text-muted">
-                        Drag & drop a file here, or click to select.
+                        Drag & drop a file here, or click the button to select.
                     </p>
                 </div>
             }

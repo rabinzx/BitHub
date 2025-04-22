@@ -81,7 +81,7 @@ h1 {
   line-height: 1.1;
 }
 
-input {
+input:not([type=checkbox]):not([type=radio])  {
   border-radius: 8px;
   border: 1px solid var(--color-border);
   padding: 0.6em 1.2em;
