@@ -63,7 +63,6 @@ const MainCanvas = () => {
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <label htmlFor="" className="text-xl font-bold">Input Type: decimal</label>
                         <InputComponent type="decimal" register={register} errors={errors} name="height"
                             value={person.heightInFeet} onChange={(_heightInFeet) => updatePerson('heightInFeet', _heightInFeet)} />
                         <p className="text-xl">Height (ft): {person.heightInFeet}</p>
@@ -71,7 +70,6 @@ const MainCanvas = () => {
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <label htmlFor="" className="text-xl font-bold">Input Type: zip</label>
                         <InputComponent type="zip" name="zip" value={person.zip}
                             onChange={(_zip) => updatePerson('zip', _zip)} />
                         <p className="text-xl">Zip: {person.zip}</p>
@@ -120,7 +118,7 @@ const MainCanvas = () => {
 
                     <div className="mt-4">
                         {/* create input file upload component */}
-                        <InputComponent type="file" register={register} errors={errors} name="file" value={person.file} onChange={(val) => updatePerson('file', val)} />
+                        <InputComponent type="file" register={register} errors={errors} name="file" displayLabel={false} value={person.file} onChange={(val) => updatePerson('file', val)} />
                         <img className="mt-2" src={person.file ?? undefined} style={{ 'maxHeight': '250px' }} />
                     </div>
                 </div>

@@ -21,6 +21,7 @@ interface InputProps {
     register?: UseFormRegister<FieldValues>;
     errors?: FieldErrors<FieldValues>;
     name: string;
+    displayLabel?: boolean;
     matchValue?: string;
     multipleOptions?: Dictionary;
     fileType?: string;
@@ -127,134 +128,139 @@ const InputComponent: React.FC<InputProps> = (props) => {
     }
 
     return (
-        <div className={`flex justify-center items-center ${layout} ${props.containerClass}`}>
-            <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'mb-2' : 'mr-2'}`} htmlFor={sanatizedName}>{sanatizedName}</label>
+        <div className={`flex items-center ${layout} ${props.containerClass}`}>
             {
-                props.type === 'text' &&
-                <input type="text" id={sanatizedName} value={inputValue as string} onChange={inputChangeHandler} />
+                (props.displayLabel === undefined ? true : props.displayLabel) &&
+                <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'mb-2' : 'mr-2'}`} htmlFor={sanatizedName}>{props.name}</label>
             }
 
-            {
-                props.type === 'integer' &&
-                <input type="number" id={sanatizedName} {...props.register!(props.name, rules.integer)}
-                    step="1" value={inputValue as number} onChange={inputChangeHandler} />
-            }
+            <div className={"text-left"}>
+                {
+                    props.type === 'text' &&
+                    <input type="text" id={sanatizedName} value={inputValue as string} onChange={inputChangeHandler} />
+                }
 
-            {
-                props.type === 'decimal' &&
-                <input type="number" {...props.register!(props.name, rules.decimal)}
-                    step="0.01" value={inputValue as number} onChange={inputChangeHandler} />
-            }
+                {
+                    props.type === 'integer' &&
+                    <input type="number" id={sanatizedName} {...props.register!(props.name, rules.integer)}
+                        step="1" value={inputValue as number} onChange={inputChangeHandler} />
+                }
 
-            {
-                props.type === 'zip' &&
-                <InputMask
-                    mask="99999-9999"
-                    value={inputValue}
-                    onChange={inputChangeHandler}
-                    beforeMaskedStateChange={beforeMaskedStateChange}
-                >
-                    <input type="text" placeholder='99999-9999' />
-                </InputMask>
-            }
+                {
+                    props.type === 'decimal' &&
+                    <input type="number" id={sanatizedName} {...props.register!(props.name, rules.decimal)}
+                        step="0.01" value={inputValue as number} onChange={inputChangeHandler} />
+                }
 
-            {
-                props.type === 'date' &&
-                <InputMask
-                    mask="99/99/9999"
-                    {...props.register!(props.name, rules.date)}
-                    value={inputValue}
-                    onChange={inputChangeHandler}
-                >
-                    <input type="tel" placeholder='MM/dd/yyyy' />
-                </InputMask>
-            }
+                {
+                    props.type === 'zip' &&
+                    <InputMask
+                        mask="99999-9999"
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                        beforeMaskedStateChange={beforeMaskedStateChange}
+                    >
+                        <input type="text" id={sanatizedName} placeholder='99999-9999' />
+                    </InputMask>
+                }
 
-            {
-                props.type === 'phone' &&
-                <InputMask
-                    mask="(999) 999-9999"
-                    {...props.register!(props.name, rules.phone)}
-                    value={inputValue}
-                    onChange={inputChangeHandler}
-                >
-                    <input type="tel" placeholder='(999) 999-9999' />
-                </InputMask>
-            }
+                {
+                    props.type === 'date' &&
+                    <InputMask
+                        mask="99/99/9999"
+                        {...props.register!(props.name, rules.date)}
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                    >
+                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' />
+                    </InputMask>
+                }
 
-            {
-                props.type === 'checkbox' &&
-                <div className="flex gap-2">
-                    <input type="checkbox" className="peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
+                {
+                    props.type === 'phone' &&
+                    <InputMask
+                        mask="(999) 999-9999"
+                        {...props.register!(props.name, rules.phone)}
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                    >
+                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' />
+                    </InputMask>
+                }
+
+                {
+                    props.type === 'checkbox' &&
+                    <div className="flex gap-2">
+                        <input type="checkbox" id={sanatizedName} className="peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
                         focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100
                         checked:bg-primary-light checked:border-0
                         disabled:border-steel-400 disabled:bg-steel-400"
-                        checked={inputValue as boolean} onChange={inputChangeHandler} />
-                    <svg
-                        className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                            checked={inputValue as boolean} onChange={inputChangeHandler} />
+                        <svg
+                            className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+
+                    </div>
+                }
+
+                {
+                    props.type === 'password' &&
+                    <input type="password" id={sanatizedName} {...props.register!(props.name, props.matchValue ? rules.passwordMatch(props.matchValue!) : rules.password)}
+                        placeholder='*********' value={inputValue as string} onChange={inputChangeHandler} />
+                }
+
+                {
+                    props.type === 'radio' &&
+                    <div className='flex gap-2'>
+                        {Object.entries(props.multipleOptions!).map(([key, value]) => (
+                            <div key={key} className='flex gap-2 items-center'>
+                                <input
+                                    type="radio"
+                                    id={`radio-${props.name}-${key}`}
+                                    value={key}
+                                    className='appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light'
+                                    {...props.register!(props.name, rules.radio)}
+                                    checked={inputValue === key}
+                                    onChange={inputChangeHandler}
+                                />
+                                <label className='mr-2' htmlFor={`radio-${props.name}-${key}`} >
+                                    {value}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                }
+
+                {props.type === 'file' &&
+                    <div
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
+                        style={{ position: 'relative' }}
                     >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
+                        <input type="file" id={sanatizedName} className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
+                            {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
+                        <p className="text-muted">
+                            Drag & drop a file here, or click the button to select.
+                        </p>
+                    </div>
+                }
 
-                </div>
-            }
-
-            {
-                props.type === 'password' &&
-                <input type="password" {...props.register!(props.name, props.matchValue ? rules.passwordMatch(props.matchValue!) : rules.password)}
-                    placeholder='*********' value={inputValue as string} onChange={inputChangeHandler} />
-            }
-
-            {
-                props.type === 'radio' &&
-                <div className='flex gap-2'>
-                    {Object.entries(props.multipleOptions!).map(([key, value]) => (
-                        <div key={key} className='flex gap-2 items-center'>
-                            <input
-                                type="radio"
-                                id={`radio-${props.name}-${key}`}
-                                value={key}
-                                className='appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light'
-                                {...props.register!(props.name, rules.radio)}
-                                checked={inputValue === key}
-                                onChange={inputChangeHandler}
-                            />
-                            <label className='mr-2' htmlFor={`radio-${props.name}-${key}`} >
-                                {value}
-                            </label>
-                        </div>
-                    ))}
-                </div>
-            }
-
-            {props.type === 'file' &&
-                <div
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
-                    style={{ position: 'relative' }}
-                >
-                    <input type="file" className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
-                        {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
-                    <p className="text-muted">
-                        Drag & drop a file here, or click the button to select.
-                    </p>
-                </div>
-            }
-
-            {props.errors &&
-                props.errors[props.name] &&
-                <div className='mt-2'>{String(props.errors[props.name]!.message)}</div>
-            }
-
+                {props.errors &&
+                    props.errors[props.name] &&
+                    <div className='mt-2 text-error'>{String(props.errors[props.name]!.message)}</div>
+                }
+            </div>
         </div>
     );
 }
