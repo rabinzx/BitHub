@@ -1,6 +1,9 @@
 import { useState } from "react";
 import InputComponent from "../components/InputComponent";
+import CardComponent from "../components/CardComponent";
 import { useForm } from "react-hook-form";
+import GridComponent from "../components/GridComponent";
+
 
 const MainCanvas = () => {
     const [person, setPerson] = useState({
@@ -44,6 +47,30 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
+
+            <div className="mb-4 w-full">
+                <GridComponent headers={['EmpId', 'EmpName', 'Age', 'Num']} rows={[[1, 'John sdfasd', 4, 6], [2, 'Jack', 4, 6], [3, 'James', 4, 6]]}
+                    renderCell={(cell, rowIndex, cellIndex) => {
+                        if (cellIndex === 0) {
+                            return <span className="text-blue-500">{cell}</span>;
+                        } else if (cellIndex === 1) {
+                            return <span className="text-green-500">{cell}</span>;
+                        } else if (cellIndex === 2) {
+                            return <span className="text-red-500">{cell}</span>;
+                        } else {
+                            return cell;
+                        }
+                    }}
+                />
+            </div>
+
+            <div className="mb-4">
+                <CardComponent title={<div className="text-green-600">Card Title</div>}  >
+                    <p>This is the content of the card.</p>
+                    <p className="text-red-600">It can contain any JSX elements.</p>
+                </CardComponent>
+            </div>
+
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">
 
                 <div className="grid gap-4 justify-around grid-flow-row grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
