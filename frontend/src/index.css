@@ -6,13 +6,13 @@
   /* Colors */
   --color-primary: #4f46e5;         /* Indigo */
   --color-primary-light: #6366f1;
-  --color-secondary: #10b981;       /* Emerald */
-  --color-background: #ffffff;
-  --color-surface: #f9fafb;
+  --color-secondary: #6b7280;
   --color-text: #111827;
-  --color-muted: #6b7280;
+  --color-background: #ffffff;
   --color-border: #e5e7eb;
+  --color-success: #10b981;       /* Emerald */
   --color-error: #ef4444;
+  --color-warning: #ffd044;
 
   /* Typography */
   --font-family-sans: 'Inter', 'Segoe UI', sans-serif;
@@ -50,8 +50,8 @@
   font-weight: 400;
   
   color-scheme: light dark;
-  color: var(--color-primary);
-  background: var(--color-muted);
+  color: var(--color-text);
+  background: var(--color-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -100,7 +100,7 @@ button {
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  color: var(--color-surface);
+  color: var(--color-background);
   background: var(--color-primary);
   transition: border-color 0.25s;
 }
@@ -116,13 +116,13 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--color-text);
-    background: var(--color-surface);
+    background: var(--color-background);
   }
   a:hover {
     color: var(--color-primary);
   }
   button {
-    background: var(--color-surface);
+    background: var(--color-background);
   }
 }
 

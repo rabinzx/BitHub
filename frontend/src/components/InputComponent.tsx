@@ -250,7 +250,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     >
                         <input type="file" id={sanatizedName} className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
                             {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
-                        <p className="text-muted">
+                        <p className="text-secondary">
                             Drag & drop a file here, or click the button to select.
                         </p>
                     </div>

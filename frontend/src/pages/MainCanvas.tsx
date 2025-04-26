@@ -44,21 +44,32 @@ const MainCanvas = () => {
         formState: { errors },
     } = useForm();
 
+    const headerTest = ['EmpId', 'EmpName', 'Age', 'Salary'];
+    const rowsTest = Array(35).fill(0).map((_, index) => {
+        return [index + 1, 'John', 26, 100_000];
+    });
+
+
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
 
-            <div className="mb-4 w-full">
-                <GridComponent headers={['EmpId', 'EmpName', 'Age', 'Num']} rows={[[1, 'John sdfasd', 4, 6], [2, 'Jack', 4, 6], [3, 'James', 4, 6]]}
-                    renderCell={(cell, rowIndex, cellIndex) => {
-                        if (cellIndex === 0) {
-                            return <span className="text-blue-500">{cell}</span>;
-                        } else if (cellIndex === 1) {
-                            return <span className="text-green-500">{cell}</span>;
-                        } else if (cellIndex === 2) {
-                            return <span className="text-red-500">{cell}</span>;
-                        } else {
-                            return cell;
+            <div className="mb-4 max-w-dvw overflow-x-auto">
+                <GridComponent headers={headerTest} rows={rowsTest}
+                    renderHeaderCell={(header, headerIndex) => {
+                        return <span className="text-blue-500">{header}</span>;
+                    }}
+
+                    renderCell={(cell, headerName, rowIndex, cellIndex) => {
+                        switch (headerName) {
+                            case 'EmpId':
+                                return <span className="text-blue-500">{cell}</span>;
+                            case 'EmpName':
+                                return <span className="text-green-500">{cell}</span>;
+                            case 'Age':
+                                return <span className="text-red-500">{cell}</span>;
+                            default:
+                                return cell
                         }
                     }}
                 />
