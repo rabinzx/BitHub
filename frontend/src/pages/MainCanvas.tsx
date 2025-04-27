@@ -45,9 +45,16 @@ const MainCanvas = () => {
     } = useForm();
 
     const headerTest = ['EmpId', 'EmpName', 'Age', 'Salary'];
+    const getRandomIntInclusive = (min: number, max: number) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+
     const rowsTest = Array(35).fill(0).map((_, index) => {
-        return [index + 1, 'John', 26, 100_000];
+        return [index + 1, 'John', getRandomIntInclusive(20, 60), 100_000];
     });
+
 
 
     return (
@@ -59,6 +66,8 @@ const MainCanvas = () => {
                     renderHeaderCell={(header, headerIndex) => {
                         return <span className="text-blue-500">{header}</span>;
                     }}
+
+                    columnSorting={{ 'EmpId': true, 'EmpName': true, 'Salary': false }}
 
                     renderCell={(cell, headerName, rowIndex, cellIndex) => {
                         switch (headerName) {
