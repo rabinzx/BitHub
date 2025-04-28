@@ -62,13 +62,12 @@ const MainCanvas = () => {
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
 
             <div className="mb-4 max-w-dvw overflow-x-auto">
-                <GridComponent headers={headerTest} rows={rowsTest}
+                <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true} cssClass={{ cell: 'even:bg-green-50 odd:bg-blue-50' }}
                     renderHeaderCell={(header, headerIndex) => {
                         return <span className="text-blue-500">{header}</span>;
                     }}
 
-                    columnSorting={{ 'EmpId': true, 'EmpName': true, 'Salary': false }}
-
+                    columnSorting={{ 'EmpId': true, 'Age': true, 'Salary': true, }}
                     renderCell={(cell, headerName, rowIndex, cellIndex) => {
                         switch (headerName) {
                             case 'EmpId':
@@ -77,6 +76,13 @@ const MainCanvas = () => {
                                 return <span className="text-green-500">{cell}</span>;
                             case 'Age':
                                 return <span className="text-red-500">{cell}</span>;
+                            case 'Salary':
+                                return <span className="text-primary">{
+                                    new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: 'USD'
+                                    }).format(+cell)
+                                }</span>;
                             default:
                                 return cell
                         }
