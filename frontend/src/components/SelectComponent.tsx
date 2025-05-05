@@ -1,20 +1,24 @@
 import React, { use, useEffect, useMemo, useRef } from 'react';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import InputComponent from './InputComponent';
+import GridComponent from './GridComponent';
 
 type ReturnValueType = string | number | boolean | object;
 
 interface SelectComponentProps {
-    options: Array<{ label: string; value: string }>;
+    options: Array<{ label: string; value: string } | object>;
     placeholder?: string;
     disabled?: boolean;
     maxDisplayItems?: number;
     allowMultiple?: boolean;
     className?: string;
+    maxDropdownHeightInPX?: number;
+    isComboBox?: boolean;
+    comboBoxLabelField?: string;
     onChange: (value: ReturnValueType | Array<ReturnValueType>) => void;
 }
 
-const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, onChange }) => {
+const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, onChange }) => {
     // state to manage select-all checkbox
     const [selectedAll, setSelectedAll] = React.useState(false);
 
@@ -39,7 +43,15 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
 
     // Computed property for the labels of selected items
     const selectedItemLabels = useMemo(() => {
-        return selectedItemIndexes.map((index) => (options[index].label)).join(', ');
+        if (isComboBox) {
+            // Default to the first key of the first object in options
+            const labelField = comboBoxLabelField && comboBoxLabelField in (options[0] as Record<string, any>) ?
+                comboBoxLabelField :
+                Object.keys(options[0])[0];
+            return selectedItemIndexes.map((index) => ((options[index] as Record<string, any>)[labelField])).join(', ');
+        } else {
+            return selectedItemIndexes.map((index) => ('label' in options[index] ? options[index].label : '')).join(', ');
+        }
     }, [selectedItemIndexes]);
 
     // Register handleClickOutside event listener to close the dropdown when clicking outside of it
@@ -72,7 +84,14 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
             setSelectedItemIndexes(updatedSelectedItemIndexes);
 
             // Pass the value to the parent component
-            onChange(updatedSelectedItemIndexes.map(index => options[index].value));
+            if (isComboBox) {
+                onChange(updatedSelectedItemIndexes.map(index => options[index]));
+            } else {
+                onChange(updatedSelectedItemIndexes.map(index => {
+                    const option = options[index];
+                    return 'value' in option ? option.value : null;
+                }));
+            }
 
             // Update the checkbox state
             const _optionsChecked = [...optionsChecked];
@@ -83,7 +102,11 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
             setSelectedItemIndexes([idx]);
 
             // Pass the value to the parent component
-            onChange(options[idx].value);
+            if (isComboBox) {
+                onChange(options[idx]);
+            } else {
+                onChange('value' in options[idx] ? options[idx].value : '');
+            }
 
             // Update the checkbox state, set the selected item to true and others to false
             setOptionsChecked(options.map((_, index) => index === idx));
@@ -97,7 +120,11 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
         // Update the selectedItemIndexes state based on the checkbox state
         setSelectedItemIndexes(isChecked ? options.map((_, index) => index) : []);
         // Pass the value to the parent component
-        onChange(isChecked ? options.map((obj) => obj.value) : []);
+        if (isComboBox) {
+            onChange(isChecked ? options : []);
+        } else {
+            onChange(isChecked ? options.map((obj) => 'value' in obj ? obj.value : '') : []);
+        }
         // Update the checkbox state
         setOptionsChecked(new Array(options.length).fill(isChecked));
     }
@@ -110,14 +137,14 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
 
     return (
         <div
-            className={`relative border rounded-md shadow-md h-10 min-w-50 p-2 w-full flex justify-between items-center bg-background text-left ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${disabled && 'border-gray-400  bg-gray-200'} ${className}`}
+            className={`relative border rounded-md shadow-md h-10 min-w-50 p-2 w-full flex justify-between items-center bg-background text-left ${disabled ? 'cursor-not-allowed' : ''} ${disabled && 'border-gray-400  bg-gray-200'} ${className}`}
             onClick={(e) => e.stopPropagation()}
             ref={mainContainerRef}
         >
             <div className="hidden">
                 <input type="text" name="" id="" />
             </div>
-            <div className='flex-1' onClick={() => setDisplayDropdownCore(!displayDropdown)}>
+            <div className='flex-1 cursor-pointer' onClick={() => setDisplayDropdownCore(!displayDropdown)}>
                 {
                     selectedItemIndexes.length ?
                         <div className="unselectable max-h-lg overflow-hidden">{selectedItemIndexes.length > maxDisplayItemsState ? `${selectedItemIndexes.length} items selected` : selectedItemLabels}</div> :
@@ -127,15 +154,15 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
             <div>
                 {
                     selectedItemIndexes.length > 0 && allowMultiple &&
-                    <XMarkIcon className='size-5' onClick={() => selectAllHandler(false)} />
+                    <XMarkIcon className='size-5 cursor-pointer' onClick={() => selectAllHandler(false)} />
                 }
             </div>
             <div>
-                <ChevronDownIcon className='size-5' onClick={() => setDisplayDropdownCore(!displayDropdown)} />
+                <ChevronDownIcon className='size-5 cursor-pointer' onClick={() => setDisplayDropdownCore(!displayDropdown)} />
             </div>
             {
                 displayDropdown &&
-                <div className="absolute border cursor-default rounded-md z-1001 top-10 left-0 w-full bg-background shadow-md">
+                <div className="absolute border rounded-md z-1001 top-10 left-0 w-full bg-background shadow-md">
                     {
                         allowMultiple &&
                         <div className="flex justify-between items-center border-b p-1">
@@ -145,23 +172,54 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                             </div>
                         </div>
                     }
-                    <div className='max-h-50 p-1 overflow-y-auto' >
-                        <ul>
-                            {
-                                options.map((option, index) => {
-                                    return (
-                                        <li key={index} className='w-full hover:bg-gray-200 rounded-md'>
-                                            <InputComponent type="checkbox"
-                                                name={option.label}
-                                                value={optionsChecked[index]}
-                                                layout='RowReverse'
-                                                className={{ container: 'px-2 py-1', label: 'text-[1rem] font-normal flex-1', input: (allowMultiple ? '' : 'hidden') }}
-                                                onChange={(e) => listItemSelectedHandler(index, Boolean(e))} />
-                                        </li>
-                                    )
-                                })
-                            }
-                        </ul>
+                    <div className={`max-h-${maxDropdownHeightInPX ?? '50'} ${!isComboBox && 'p-1'} overflow-y-auto`} >
+                        {
+                            !isComboBox ? (
+                                <ul>
+                                    {
+                                        options.map((option, index) => {
+                                            return (
+                                                <li key={index} className='w-full hover:bg-gray-200 rounded-md'>
+                                                    <InputComponent type="checkbox"
+                                                        name={'label' in option ? option.label : ''}
+                                                        value={optionsChecked[index]}
+                                                        layout='RowReverse'
+                                                        className={{ container: 'px-2 py-1', label: 'text-[1rem] font-normal flex-1', input: (allowMultiple ? '' : 'hidden') }}
+                                                        onChange={() => listItemSelectedHandler(index, !optionsChecked[index])} />
+                                                </li>
+                                            )
+                                        })
+                                    }
+                                </ul>
+                            ) :
+                                (
+                                    <GridComponent
+                                        headers={allowMultiple ? ['', ...Object.keys(options[0])] : Object.keys(options[0])}
+                                        rows={options.map((option) => allowMultiple ? ['', ...Object.values(option)] : Object.values(option))}
+                                        allowPageSizeChange={false}
+                                        className={{
+                                            container: `text-sm ${allowMultiple ? 'rounded-none' : 'rounded-md'} border-none`, cell: ''
+                                        }}
+                                        renderCell={(cell, headerName, rowIndex, cellIndex) => {
+                                            if (headerName === '') {
+                                                return (
+                                                    <InputComponent type="checkbox"
+                                                        name={String(cell)}
+                                                        value={optionsChecked[rowIndex]}
+                                                        className={{ container: '' }}
+                                                        onChange={() => listItemSelectedHandler(rowIndex, !optionsChecked[rowIndex])} />
+                                                )
+                                            } else {
+                                                return (
+                                                    <span className="text-sm font-normal cursor-pointer"
+                                                        onClick={() => listItemSelectedHandler(rowIndex, !optionsChecked[rowIndex])}>
+                                                        {cell}
+                                                    </span>
+                                                )
+                                            }
+                                            return cell;
+                                        }} />
+                                )}
                     </div>
                 </div>
             }

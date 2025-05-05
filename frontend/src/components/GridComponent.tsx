@@ -6,6 +6,7 @@ interface GridComponentProps {
     rows: Array<Array<string | number>>;
     columnSorting?: { [header: string]: boolean };
     columnWidth?: { [header: string]: string };
+    allowPaginaton?: boolean;
     allowPageSizeChange?: boolean;
     pageSize?: number | Array<number>;
     className?: { container?: string, header?: string, cell?: string, footer?: string };
@@ -16,7 +17,7 @@ interface GridComponentProps {
 type SortOrder = 'asc' | 'desc' | '';
 type SortOrderDict = { [idx: number]: SortOrder };
 
-const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPageSizeChange, pageSize, className, renderHeaderCell, renderCell }) => {
+const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderCell }) => {
     // State to manage the table headers and rows
     const [tableHeaders, setTableHeaders] = useState(headers);
     useEffect(() => {
@@ -43,13 +44,19 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
 
     // Set the current page size based on the provided pageSize prop or default to the first option
     const [currentPageSize, setCurrentPageSize] = useState(
-        pageSize && !Array.isArray(pageSize) ? pageSize : pageSizeOptions[0]
+        allowPaginaton ?
+            (pageSize && !Array.isArray(pageSize) ? pageSize : pageSizeOptions[0]) :
+            rows.length
     );
 
     // Effect to update the current page size when the pageSize prop or pageSizeOptions change
     useEffect(() => {
-        setCurrentPageSize(pageSize && !Array.isArray(pageSize) ? pageSize : pageSizeOptions[0]);
-    }, [pageSize, pageSizeOptions]);
+        if (allowPaginaton) {
+            setCurrentPageSize(pageSize && !Array.isArray(pageSize) ? pageSize : pageSizeOptions[0]);
+        } else {
+            setCurrentPageSize(rows.length);
+        }
+    }, [pageSize, pageSizeOptions, allowPaginaton]);
 
     // State to manage the current page
     const [currentPage, setCurrentPage] = useState(1);
@@ -161,7 +168,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                 </thead>
                 <tbody>
                     {currentRows.map((row, rowIndex) => (
-                        <tr key={rowIndex} className={`bg-background text-text hover:bg-blue-100 cursor-pointer transition-colors duration-200 ${className?.cell}`}>
+                        <tr key={rowIndex} className={`bg-background text-text hover:bg-blue-100 transition-colors duration-200 ${className?.cell}`}>
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
                                     {renderCell ? renderCell(cell, tableHeaders[cellIndex], rowIndex, cellIndex) : cell}
@@ -170,34 +177,36 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                         </tr>
                     ))}
                 </tbody>
-                <tfoot className='text-sm'>
-                    <tr className={`bg-blue-100 ${className?.footer}`}>
-                        <td className='border p-2' colSpan={columnCount}>
-                            <div className='flex justify-end items-center gap-4'>
-                                {allowPageSizeChange &&
+                {allowPaginaton &&
+                    <tfoot className='text-sm'>
+                        <tr className={`bg-blue-100 ${className?.footer}`}>
+                            <td className='border p-2' colSpan={columnCount}>
+                                <div className='flex justify-end items-center gap-4'>
+                                    {allowPageSizeChange &&
+                                        <div>
+                                            <label htmlFor="pageSize" className='mr-2'>rows per page:</label>
+                                            <select value={currentPageSize} onChange={pageSizeHandler} className='border p-1 rounded'>
+                                                {pageSizeOptions.map(size => (
+                                                    <option key={size} value={size}>{size}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    }
                                     <div>
-                                        <label htmlFor="pageSize" className='mr-2'>rows per page:</label>
-                                        <select value={currentPageSize} onChange={pageSizeHandler} className='border p-1 rounded'>
-                                            {pageSizeOptions.map(size => (
-                                                <option key={size} value={size}>{size}</option>
-                                            ))}
-                                        </select>
+                                        {(currentPage - 1) * currentPageSize + 1} to {Math.min(currentPage * currentPageSize, tableRows.length)} of {tableRows.length} items
                                     </div>
-                                }
-                                <div>
-                                    {(currentPage - 1) * currentPageSize + 1} to {Math.min(currentPage * currentPageSize, tableRows.length)} of {tableRows.length} items
+                                    <div>
+                                        <ChevronDoubleLeftIcon className="size-4 inline cursor-pointer" title='First Page' onClick={() => navigateToPage(1)} />
+                                        <ChevronLeftIcon className="size-4 inline cursor-pointer" title='Last Page' onClick={() => navigateToPage(currentPage - 1)} />
+                                        <span className='px-2'>page {currentPage} of {totalPages}</span>
+                                        <ChevronRightIcon className="size-4 inline cursor-pointer" title='Next Page' onClick={() => navigateToPage(currentPage + 1)} />
+                                        <ChevronDoubleRightIcon className="size-4 inline cursor-pointer" title='Last Page' onClick={() => navigateToPage(totalPages)} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <ChevronDoubleLeftIcon className="size-4 inline cursor-pointer" title='First Page' onClick={() => navigateToPage(1)} />
-                                    <ChevronLeftIcon className="size-4 inline cursor-pointer" title='Last Page' onClick={() => navigateToPage(currentPage - 1)} />
-                                    <span className='px-2'>page {currentPage} of {totalPages}</span>
-                                    <ChevronRightIcon className="size-4 inline cursor-pointer" title='Next Page' onClick={() => navigateToPage(currentPage + 1)} />
-                                    <ChevronDoubleRightIcon className="size-4 inline cursor-pointer" title='Last Page' onClick={() => navigateToPage(totalPages)} />
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </tfoot>
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     );

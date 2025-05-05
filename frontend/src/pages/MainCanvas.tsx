@@ -36,6 +36,16 @@ const MainCanvas = () => {
         { label: 'Sydney', value: 'sydney' },
     ];
 
+
+    const cityOptions2 = [
+        { CityName: 'New York', CityKey: 'newYork', Population: 8_336_817 },
+        { CityName: 'Rome', CityKey: 'rome', Population: 2_837_216 },
+        { CityName: 'London', CityKey: 'london', Population: 8_982_965 },
+        { CityName: 'Paris', CityKey: 'paris', Population: 2_165_423 },
+        { CityName: 'Tokyo', CityKey: 'tokyo', Population: 37_393_128 },
+        { CityName: 'Sydney', CityKey: 'sydney', Population: 5_312_163 },
+    ];
+
     const [selectedCities, setSelectedCities] = useState<Array<string>>([]);
 
     const updateCity = (value: string | Array<string>) => {
@@ -76,11 +86,12 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
-            <SelectComponent options={cityOptions} className="md:w-[20rem] mb-4" placeholder="Select Cities" onChange={updateCity} />
+            <SelectComponent options={cityOptions} isComboBox={false} comboBoxLabelField="CityKey" className="md:w-[25rem] mb-4" allowMultiple={true} maxDropdownHeightInPX={150} placeholder="Select Cities" onChange={updateCity} />
 
             <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
                 className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}
                 columnWidth={{ 'Salary': 'w-[150px]' }}
+                allowPaginaton={true}
                 renderHeaderCell={(header, headerIndex) => {
                     return <span className="text-blue-500">{header}</span>;
                 }}
