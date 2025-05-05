@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, } from 'react'
+import { use, useEffect, useRef, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
 import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
 import dayjs from "dayjs";
@@ -26,7 +26,7 @@ interface InputProps {
     multipleOptions?: Dictionary;
     fileType?: string;
     layout?: string;
-    containerClass?: string;
+    className?: { container?: string, label?: string };
 }
 
 interface maskState {
@@ -39,6 +39,7 @@ interface maskState {
 enum LayoutDirections {
     Col = "flex-col",
     Row = "flex-row",
+    RowReverse = "flex-row-reverse"
 };
 
 const InputComponent: React.FC<InputProps> = (props) => {
@@ -49,6 +50,11 @@ const InputComponent: React.FC<InputProps> = (props) => {
     const layout = props.layout && Object.keys(LayoutDirections).includes(props.layout as LayoutDirections)
         ? LayoutDirections[props.layout as keyof typeof LayoutDirections]
         : LayoutDirections.Row;
+
+    useEffect(() => {
+        setInputValue(props.value);
+    }
+        , [props.value]);
 
     const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         let tempVal: number | string | boolean = event.target.value;
@@ -128,10 +134,10 @@ const InputComponent: React.FC<InputProps> = (props) => {
     }
 
     return (
-        <div className={`flex items-center ${layout} ${props.containerClass}`}>
+        <div className={`flex items-center ${layout} ${props.className?.container}`}>
             {
                 (props.displayLabel === undefined ? true : props.displayLabel) &&
-                <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'mb-2' : 'mr-2'}`} htmlFor={sanatizedName}>{props.name}</label>
+                <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'my-2' : 'mx-2'} ${props.className?.label}`} htmlFor={sanatizedName}>{props.name}</label>
             }
 
             <div className={"text-left"}>
@@ -192,7 +198,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     props.type === 'checkbox' &&
                     <div className="flex gap-2">
                         <input type="checkbox" id={sanatizedName} className="peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
-                        focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100
+                        focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100 cursor-pointer
                         checked:bg-primary-light checked:border-0
                         disabled:border-steel-400 disabled:bg-steel-400"
                             checked={inputValue as boolean} onChange={inputChangeHandler} />

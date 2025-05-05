@@ -9,7 +9,7 @@
   --color-secondary: #6b7280;
   --color-text: #111827;
   --color-background: #ffffff;
-  --color-border: #e5e7eb;
+  --color-border: #d4d4d5;
   --color-success: #10b981;       /* Emerald */
   --color-error: #ef4444;
   --color-warning: #ffd044;
@@ -59,6 +59,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+div, table, span, p, 
+h1, h2, h3, h4, h5, h6, a 
+table, th, tr, td {
+  border-color: var(--color-border);
+}
+
 a {
   font-weight: 500;
   color: var(--color-primary-light);
@@ -79,6 +85,15 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+.unselectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 input:not([type=checkbox]):not([type=radio])  {

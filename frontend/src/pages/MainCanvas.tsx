@@ -3,6 +3,7 @@ import InputComponent from "../components/InputComponent";
 import CardComponent from "../components/CardComponent";
 import { useForm } from "react-hook-form";
 import GridComponent from "../components/GridComponent";
+import SelectComponent from "../components/SelectComponent";
 
 
 const MainCanvas = () => {
@@ -24,6 +25,21 @@ const MainCanvas = () => {
         male: 'Male',
         female: 'Female',
         other: 'Other',
+    };
+
+    const cityOptions = [
+        { label: 'New York', value: 'newYork' },
+        { label: 'Rome', value: 'rome' },
+        { label: 'London', value: 'london' },
+        { label: 'Paris', value: 'paris' },
+        { label: 'Tokyo', value: 'tokyo' },
+        { label: 'Sydney', value: 'sydney' },
+    ];
+
+    const [selectedCities, setSelectedCities] = useState<Array<string>>([]);
+
+    const updateCity = (value: string | Array<string>) => {
+        console.log("Selected city:", value);
     };
 
     const updatePerson = (key: string, value: string | number | boolean) => {
@@ -60,42 +76,41 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
+            <SelectComponent options={cityOptions} className="md:w-[20rem] mb-4" allowMultiple={true} disabled={false} placeholder="Select Cities" onChange={updateCity} />
 
-            <div className="mb-4 max-w-dvw overflow-x-auto">
-                <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true} cssClass={{ cell: 'even:bg-green-50 odd:bg-blue-50' }}
-                    renderHeaderCell={(header, headerIndex) => {
-                        return <span className="text-blue-500">{header}</span>;
-                    }}
+            <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
+                className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}
+                columnWidth={{ 'Salary': 'w-[150px]' }}
+                renderHeaderCell={(header, headerIndex) => {
+                    return <span className="text-blue-500">{header}</span>;
+                }}
 
-                    columnSorting={{ 'EmpId': true, 'Age': true, 'Salary': true, }}
-                    renderCell={(cell, headerName, rowIndex, cellIndex) => {
-                        switch (headerName) {
-                            case 'EmpId':
-                                return <span className="text-blue-500">{cell}</span>;
-                            case 'EmpName':
-                                return <span className="text-green-500">{cell}</span>;
-                            case 'Age':
-                                return <span className="text-red-500">{cell}</span>;
-                            case 'Salary':
-                                return <span className="text-primary">{
-                                    new Intl.NumberFormat('en-US', {
-                                        style: 'currency',
-                                        currency: 'USD'
-                                    }).format(+cell)
-                                }</span>;
-                            default:
-                                return cell
-                        }
-                    }}
-                />
-            </div>
+                columnSorting={{ 'EmpId': true, 'Age': true, 'Salary': true, }}
+                renderCell={(cell, headerName, rowIndex, cellIndex) => {
+                    switch (headerName) {
+                        case 'EmpId':
+                            return <span className="text-blue-500">{cell}</span>;
+                        case 'EmpName':
+                            return <span className="text-green-500">{cell}</span>;
+                        case 'Age':
+                            return <span className="text-red-500">{cell}</span>;
+                        case 'Salary':
+                            return <span className="text-primary">{
+                                new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD'
+                                }).format(+cell)
+                            }</span>;
+                        default:
+                            return cell
+                    }
+                }}
+            />
 
-            <div className="mb-4">
-                <CardComponent title={<div className="text-green-600">Card Title</div>}  >
-                    <p>This is the content of the card.</p>
-                    <p className="text-red-600">It can contain any JSX elements.</p>
-                </CardComponent>
-            </div>
+            <CardComponent title={<div className="text-green-600">Card Title</div>} className="mb-4" >
+                <p>This is the content of the card.</p>
+                <p className="text-red-600">It can contain any JSX elements.</p>
+            </CardComponent>
 
             <form onSubmit={handleSubmit(onSubmit)} className="w-full">
 
