@@ -2,19 +2,16 @@ import React, { use, useEffect, useMemo, useRef } from 'react';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import InputComponent from './InputComponent';
 
-type ReturnValueType = string | number | boolean;
+type ReturnValueType = string | number | boolean | object;
 
 interface SelectComponentProps {
-    // value: ReturnValueType | Array<ReturnValueType>;
     options: Array<{ label: string; value: string }>;
     placeholder?: string;
     disabled?: boolean;
     maxDisplayItems?: number;
-    // error?: boolean;
-    // errorMessage?: string;
     allowMultiple?: boolean;
     className?: string;
-    onChange: (value: string | Array<string>) => void;
+    onChange: (value: ReturnValueType | Array<ReturnValueType>) => void;
 }
 
 const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, onChange }) => {
@@ -34,6 +31,12 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
 
     const mainContainerRef = useRef<HTMLDivElement>(null);
 
+    const setDisplayDropdownCore = (value: boolean) => {
+        if (!disabled) {
+            setDisplayDropdown(value);
+        }
+    };
+
     // Computed property for the labels of selected items
     const selectedItemLabels = useMemo(() => {
         return selectedItemIndexes.map((index) => (options[index].label)).join(', ');
@@ -43,7 +46,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent | TouchEvent) => {
             if (mainContainerRef.current && !mainContainerRef.current.contains(event.target as Node)) {
-                setDisplayDropdown(false);
+                setDisplayDropdownCore(false);
             }
         };
 
@@ -82,10 +85,11 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
             // Pass the value to the parent component
             onChange(options[idx].value);
 
-            // Update the checkbox state
-            setOptionsChecked(options.map((_, index) => index === idx ? isChecked : false));
-        }
+            // Update the checkbox state, set the selected item to true and others to false
+            setOptionsChecked(options.map((_, index) => index === idx));
 
+            setDisplayDropdownCore(false);
+        }
     };
 
     const selectAllHandler = (isChecked: boolean) => {
@@ -98,22 +102,22 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
         setOptionsChecked(new Array(options.length).fill(isChecked));
     }
 
-    // // Update the selectedAll state based on the selectedItemIndexes state
-    // useEffect(() => {
-    //     setSelectedAll(selectedItemIndexes.length === options.length)
-    // }, [selectedItemIndexes]);
+    // Update the selectedAll state based on the selectedItemIndexes state
+    useEffect(() => {
+        setSelectedAll(selectedItemIndexes.length === options.length)
+    }, [selectedItemIndexes]);
 
 
     return (
         <div
-            className={`relative border rounded-md shadow-md h-10 min-w-50 p-2 w-full flex justify-between items-center bg-background text-left ${className} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} `}
+            className={`relative border rounded-md shadow-md h-10 min-w-50 p-2 w-full flex justify-between items-center bg-background text-left ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${disabled && 'border-gray-400  bg-gray-200'} ${className}`}
             onClick={(e) => e.stopPropagation()}
             ref={mainContainerRef}
         >
             <div className="hidden">
                 <input type="text" name="" id="" />
             </div>
-            <div className='flex-1' onClick={() => setDisplayDropdown(!displayDropdown)}>
+            <div className='flex-1' onClick={() => setDisplayDropdownCore(!displayDropdown)}>
                 {
                     selectedItemIndexes.length ?
                         <div className="unselectable max-h-lg overflow-hidden">{selectedItemIndexes.length > maxDisplayItemsState ? `${selectedItemIndexes.length} items selected` : selectedItemLabels}</div> :
@@ -127,7 +131,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                 }
             </div>
             <div>
-                <ChevronDownIcon className='size-5' onClick={() => setDisplayDropdown(!displayDropdown)} />
+                <ChevronDownIcon className='size-5' onClick={() => setDisplayDropdownCore(!displayDropdown)} />
             </div>
             {
                 displayDropdown &&
@@ -137,7 +141,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                         <div className="flex justify-between items-center border-b p-1">
                             <InputComponent type="checkbox" name="selectAll" className={{ container: 'px-2 py-1' }} displayLabel={false} value={selectedAll} onChange={(e) => selectAllHandler(Boolean(e))} />
                             <div className='p-1'>
-                                <XMarkIcon className='size-5 cursor-pointer' onClick={() => setDisplayDropdown(false)} />
+                                <XMarkIcon className='size-5 cursor-pointer' onClick={() => setDisplayDropdownCore(false)} />
                             </div>
                         </div>
                     }
@@ -151,7 +155,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                                 name={option.label}
                                                 value={optionsChecked[index]}
                                                 layout='RowReverse'
-                                                className={{ container: 'px-2 py-1', label: 'text-[1rem] font-normal flex-1' }}
+                                                className={{ container: 'px-2 py-1', label: 'text-[1rem] font-normal flex-1', input: (allowMultiple ? '' : 'hidden') }}
                                                 onChange={(e) => listItemSelectedHandler(index, Boolean(e))} />
                                         </li>
                                     )

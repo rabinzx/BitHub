@@ -76,7 +76,7 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
-            <SelectComponent options={cityOptions} className="md:w-[20rem] mb-4" allowMultiple={true} disabled={false} placeholder="Select Cities" onChange={updateCity} />
+            <SelectComponent options={cityOptions} className="md:w-[20rem] mb-4" placeholder="Select Cities" onChange={updateCity} />
 
             <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
                 className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}

@@ -26,7 +26,7 @@ interface InputProps {
     multipleOptions?: Dictionary;
     fileType?: string;
     layout?: string;
-    className?: { container?: string, label?: string };
+    className?: { container?: string, label?: string, input?: string };
 }
 
 interface maskState {
@@ -143,19 +143,19 @@ const InputComponent: React.FC<InputProps> = (props) => {
             <div className={"text-left"}>
                 {
                     props.type === 'text' &&
-                    <input type="text" id={sanatizedName} value={inputValue as string} onChange={inputChangeHandler} />
+                    <input type="text" id={sanatizedName} value={inputValue as string} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
                 {
                     props.type === 'integer' &&
                     <input type="number" id={sanatizedName} {...props.register!(props.name, rules.integer)}
-                        step="1" value={inputValue as number} onChange={inputChangeHandler} />
+                        step="1" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
                 {
                     props.type === 'decimal' &&
                     <input type="number" id={sanatizedName} {...props.register!(props.name, rules.decimal)}
-                        step="0.01" value={inputValue as number} onChange={inputChangeHandler} />
+                        step="0.01" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
                 {
@@ -166,7 +166,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         onChange={inputChangeHandler}
                         beforeMaskedStateChange={beforeMaskedStateChange}
                     >
-                        <input type="text" id={sanatizedName} placeholder='99999-9999' />
+                        <input type="text" id={sanatizedName} placeholder='99999-9999' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
@@ -178,7 +178,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' />
+                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
@@ -190,17 +190,17 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' />
+                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
                 {
                     props.type === 'checkbox' &&
-                    <div className="flex gap-2">
-                        <input type="checkbox" id={sanatizedName} className="peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
+                    <div className={`flex gap-2 ${props.className?.input}`}>
+                        <input type="checkbox" id={sanatizedName} className={`peer relative appearance-none shrink-0 w-4 h-4 border-2 border-blue-300 rounded-sm mt-1 bg-background
                         focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100 cursor-pointer
                         checked:bg-primary-light checked:border-0
-                        disabled:border-steel-400 disabled:bg-steel-400"
+                        disabled:border-steel-400 disabled:bg-steel-400 `}
                             checked={inputValue as boolean} onChange={inputChangeHandler} />
                         <svg
                             className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
@@ -221,7 +221,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 {
                     props.type === 'password' &&
                     <input type="password" id={sanatizedName} {...props.register!(props.name, props.matchValue ? rules.passwordMatch(props.matchValue!) : rules.password)}
-                        placeholder='*********' value={inputValue as string} onChange={inputChangeHandler} />
+                        placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
                 {
@@ -233,7 +233,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                                     type="radio"
                                     id={`radio-${props.name}-${key}`}
                                     value={key}
-                                    className='appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light'
+                                    className={`appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light ${props.className?.input}`}
                                     {...props.register!(props.name, rules.radio)}
                                     checked={inputValue === key}
                                     onChange={inputChangeHandler}
@@ -251,7 +251,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         onDrop={handleDrop}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
-                        className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"}`}
+                        className={`flex justify-center items-center h-48 border-2 border-dashed rounded-md p-6 text-center transition-all ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"} ${props.className?.input}`}
                         style={{ position: 'relative' }}
                     >
                         <input type="file" id={sanatizedName} className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
