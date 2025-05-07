@@ -2,6 +2,7 @@ import React, { use, useEffect, useMemo, useRef } from 'react';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import InputComponent from './InputComponent';
 import GridComponent from './GridComponent';
+import { set } from 'react-hook-form';
 
 type ReturnValueType = string | number | boolean | object;
 
@@ -15,10 +16,11 @@ interface SelectComponentProps {
     maxDropdownHeightInPX?: number;
     isComboBox?: boolean;
     comboBoxLabelField?: string;
+    typeToSearch?: boolean;
     onChange: (value: ReturnValueType | Array<ReturnValueType>) => void;
 }
 
-const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, onChange }) => {
+const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, typeToSearch, onChange }) => {
     // state to manage select-all checkbox
     const [selectedAll, setSelectedAll] = React.useState(false);
 
@@ -34,6 +36,8 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
     const [displayDropdown, setDisplayDropdown] = React.useState(false);
 
     const mainContainerRef = useRef<HTMLDivElement>(null);
+
+    const searchBoxRef = useRef<HTMLInputElement>(null);
 
     const setDisplayDropdownCore = (value: boolean) => {
         if (!disabled) {
@@ -57,10 +61,16 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
     // Register handleClickOutside event listener to close the dropdown when clicking outside of it
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-            if (mainContainerRef.current && !mainContainerRef.current.contains(event.target as Node)) {
+            if (mainContainerRef.current &&
+                !mainContainerRef.current.contains(event.target as Node)
+            ) {
                 setDisplayDropdownCore(false);
             }
         };
+
+        if (searchBoxRef.current) {
+            searchBoxRef.current.placeholder = 'Type to Search ...';
+        }
 
         document.addEventListener('click', handleClickOutside);
 
@@ -134,6 +144,12 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
         setSelectedAll(selectedItemIndexes.length === options.length)
     }, [selectedItemIndexes]);
 
+    const [searchText, setSearchText] = React.useState<string>('');
+
+    const updateSearchText = (value: string | number | boolean) => {
+        const _val = String(value);
+        setSearchText(_val);
+    }
 
     return (
         <div
@@ -144,12 +160,24 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
             <div className="hidden">
                 <input type="text" name="" id="" />
             </div>
-            <div className='flex-1 cursor-pointer' onClick={() => setDisplayDropdownCore(!displayDropdown)}>
+            <div className='flex-1 cursor-pointer' onClick={() => setDisplayDropdownCore(true)}>
                 {
-                    selectedItemIndexes.length ?
-                        <div className="unselectable max-h-lg overflow-hidden">{selectedItemIndexes.length > maxDisplayItemsState ? `${selectedItemIndexes.length} items selected` : selectedItemLabels}</div> :
-                        <div className="unselectable text-secondary">{placeholder}</div>
+                    typeToSearch &&
+                    <InputComponent type="text"
+                        name='selectComponentSearchBox'
+                        ref={searchBoxRef}
+                        value={searchText}
+                        displayLabel={false}
+                        className={{ container: displayDropdown ? '' : 'h-0 w-0 opacity-0', input: '!border-none focus:border-none focus:outline-none' }}
+                        onChange={updateSearchText} />
                 }
+                <div className={typeToSearch && displayDropdown ? 'hidden' : ''}>
+                    {
+                        selectedItemIndexes.length ?
+                            <div className="unselectable max-h-lg overflow-hidden">{selectedItemIndexes.length > maxDisplayItemsState ? `${selectedItemIndexes.length} items selected` : selectedItemLabels}</div> :
+                            <div className="unselectable text-secondary">{placeholder}</div>
+                    }
+                </div>
             </div>
             <div>
                 {
@@ -178,6 +206,10 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                 <ul>
                                     {
                                         options.map((option, index) => {
+                                            if ('label' in option && option.label.toLowerCase().indexOf(searchText.toLowerCase()) === -1) {
+                                                return null
+                                            }
+
                                             return (
                                                 <li key={index} className='w-full hover:bg-gray-200 rounded-md'>
                                                     <InputComponent type="checkbox"
@@ -196,11 +228,16 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                     <GridComponent
                                         headers={allowMultiple ? ['', ...Object.keys(options[0])] : Object.keys(options[0])}
                                         rows={options.map((option) => allowMultiple ? ['', ...Object.values(option)] : Object.values(option))}
-                                        allowPageSizeChange={false}
                                         className={{
                                             container: `text-sm ${allowMultiple ? 'rounded-none' : 'rounded-md'} border-none`, cell: ''
                                         }}
-                                        renderCell={(cell, headerName, rowIndex, cellIndex) => {
+                                        renderRow={(row, rowIndex) => {
+                                            if (JSON.stringify(row).indexOf(searchText.toLowerCase()) === -1) {
+                                                return false // skip the row
+                                            }
+                                            return null // fallback to use default settings
+                                        }}
+                                        renderCell={(cell, headerName, rowIndex) => {
                                             if (headerName === '') {
                                                 return (
                                                     <InputComponent type="checkbox"
@@ -217,7 +254,6 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                                     </span>
                                                 )
                                             }
-                                            return cell;
                                         }} />
                                 )}
                     </div>

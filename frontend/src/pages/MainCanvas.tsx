@@ -4,6 +4,7 @@ import CardComponent from "../components/CardComponent";
 import { useForm } from "react-hook-form";
 import GridComponent from "../components/GridComponent";
 import SelectComponent from "../components/SelectComponent";
+import rules from "../InputRules";
 
 
 const MainCanvas = () => {
@@ -86,7 +87,7 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
-            <SelectComponent options={cityOptions} isComboBox={false} comboBoxLabelField="CityKey" className="md:w-[25rem] mb-4" allowMultiple={true} maxDropdownHeightInPX={150} placeholder="Select Cities" onChange={updateCity} />
+            <SelectComponent options={cityOptions2} typeToSearch={true} isComboBox={true} comboBoxLabelField="CityKey" className="md:w-[25rem] mb-4" allowMultiple={true} maxDropdownHeightInPX={150} placeholder="Select Cities" onChange={updateCity} />
 
             <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
                 className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}
@@ -97,7 +98,7 @@ const MainCanvas = () => {
                 }}
 
                 columnSorting={{ 'EmpId': true, 'Age': true, 'Salary': true, }}
-                renderCell={(cell, headerName, rowIndex, cellIndex) => {
+                renderCell={(cell, headerName) => {
                     switch (headerName) {
                         case 'EmpId':
                             return <span className="text-blue-500">{cell}</span>;
@@ -135,14 +136,14 @@ const MainCanvas = () => {
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <InputComponent type="integer" register={register} errors={errors} name="age"
+                        <InputComponent type="integer" register={register} rules={rules.integer} errors={errors} name="age"
                             value={person.age} onChange={(_age) => updatePerson('age', _age)} />
                         <p className="text-xl">Age: {person.age}</p>
                     </div>
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <InputComponent type="decimal" register={register} errors={errors} name="height"
+                        <InputComponent type="decimal" register={register} rules={rules.decimal} errors={errors} name="height"
                             value={person.heightInFeet} onChange={(_heightInFeet) => updatePerson('heightInFeet', _heightInFeet)} />
                         <p className="text-xl">Height (ft): {person.heightInFeet}</p>
                     </div>
@@ -156,14 +157,14 @@ const MainCanvas = () => {
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <InputComponent type="date" register={register} errors={errors} name="date"
+                        <InputComponent type="date" register={register} rules={rules.date} errors={errors} name="date"
                             value={person.dob} onChange={(_dob) => updatePerson('dob', _dob)} />
                         <p className="text-xl">DOB: {person.dob}</p>
                     </div>
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <InputComponent type="phone" register={register} errors={errors} name="phone"
+                        <InputComponent type="phone" register={register} rules={rules.phone} errors={errors} name="phone"
                             value={person.phone} onChange={(_phone) => updatePerson('phone', _phone)} />
                         <p className="text-xl">Phone: {person.phone}</p>
                     </div>
@@ -183,21 +184,21 @@ const MainCanvas = () => {
                     </div>
 
                     <div className="mt-4">
-                        <InputComponent type="password" register={register} errors={errors} name="confirmSecret" matchValue={person.secret}
+                        <InputComponent type="password" register={register} rules={person.secret ? rules.passwordMatch(person.secret!) : rules.password} errors={errors} name="confirmSecret" matchValue={person.secret}
                             value={person.confirmSecret} onChange={(val) => updatePerson('confirmSecret', val)} />
                         <p className="text-xl">Confirm Secret: {person.confirmSecret}</p>
                     </div>
 
                     <div className="mt-4">
                         {/* Input Component */}
-                        <InputComponent type="radio" register={register} errors={errors} name="gender" multipleOptions={genderOptions}
+                        <InputComponent type="radio" register={register} rules={rules.radio} errors={errors} name="gender" multipleOptions={genderOptions}
                             value={person.gender} onChange={(val) => updatePerson('gender', val)} />
                         <p className="text-xl">Gender: {person.gender}</p>
                     </div>
 
                     <div className="mt-4">
                         {/* create input file upload component */}
-                        <InputComponent type="file" register={register} errors={errors} name="file" displayLabel={false} value={person.file} onChange={(val) => updatePerson('file', val)} />
+                        <InputComponent type="file" register={register} rules={rules.file(5)} errors={errors} name="file" displayLabel={false} value={person.file} onChange={(val) => updatePerson('file', val)} />
                         <img className="mt-2" src={person.file ?? undefined} style={{ 'maxHeight': '250px' }} />
                     </div>
                 </div>

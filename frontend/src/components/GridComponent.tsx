@@ -11,13 +11,14 @@ interface GridComponentProps {
     pageSize?: number | Array<number>;
     className?: { container?: string, header?: string, cell?: string, footer?: string };
     renderHeaderCell?: (header: string, headerIndex: number) => React.ReactNode;
-    renderCell?: (cell: string | number, headerName: string, rowIndex: number, cellIndex: number,) => React.ReactNode;
+    renderRow?: (row: Array<string | number>, rowIndex: number) => React.ReactNode;
+    renderCell?: (cell: string | number, headerName: string, rowIndex: number, cellIndex: number, row: Array<string | number>) => React.ReactNode;
 }
 
 type SortOrder = 'asc' | 'desc' | '';
 type SortOrderDict = { [idx: number]: SortOrder };
 
-const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderCell }) => {
+const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderRow, renderCell }) => {
     // State to manage the table headers and rows
     const [tableHeaders, setTableHeaders] = useState(headers);
     useEffect(() => {
@@ -168,10 +169,12 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                 </thead>
                 <tbody>
                     {currentRows.map((row, rowIndex) => (
+                        // allow the parent to use default settings if renderRow(row, rowIndex) returns null
+                        (renderRow && renderRow(row, rowIndex)) ??
                         <tr key={rowIndex} className={`bg-background text-text hover:bg-blue-100 transition-colors duration-200 ${className?.cell}`}>
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
-                                    {renderCell ? renderCell(cell, tableHeaders[cellIndex], rowIndex, cellIndex) : cell}
+                                    {renderCell ? renderCell(cell, tableHeaders[cellIndex], rowIndex, cellIndex, row) : cell}
                                 </td>
                             ))}
                         </tr>

@@ -74,6 +74,9 @@ const formRulePasswordMatch = (matchValue: string) => ({
 
 const formRuleFile = (maxSizeMB: number) => ({
     validate: (value: FileList) => {
+        if (!value || value.length === 0) {
+            return "File is required";
+        }
         const file = value[0];
         if (file) {
             const sizeInMB = getFileSizeMB(file.size);

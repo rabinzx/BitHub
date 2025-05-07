@@ -1,6 +1,6 @@
 import { use, useEffect, useRef, useState, } from 'react'
 import InputMask from "@mona-health/react-input-mask";
-import { FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
+import { FieldErrors, FieldValues, RegisterOptions, UseFormRegister } from "react-hook-form";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -19,6 +19,7 @@ interface InputProps {
     value: string | number | boolean | File | null;
     onChange: (value: string | number | boolean) => void;
     register?: UseFormRegister<FieldValues>;
+    rules?: RegisterOptions<FieldValues, string> | undefined;
     errors?: FieldErrors<FieldValues>;
     name: string;
     displayLabel?: boolean;
@@ -27,6 +28,7 @@ interface InputProps {
     fileType?: string;
     layout?: string;
     className?: { container?: string, label?: string, input?: string };
+    ref?: React.Ref<HTMLInputElement>;
 }
 
 interface maskState {
@@ -43,7 +45,6 @@ enum LayoutDirections {
 };
 
 const InputComponent: React.FC<InputProps> = (props) => {
-    const maxFileSizeMB = 1; // in MB
     const [inputValue, setInputValue] = useState(props.value);
     const [dragActive, setDragActive] = useState(false);
     const sanatizedName = props.name.replace(/[^a-zA-Z0-9]/g, "_"); // Sanitize name to be a valid HTML id
@@ -72,8 +73,6 @@ const InputComponent: React.FC<InputProps> = (props) => {
         }
         else if (props.type === 'file') {
 
-            console.log('file input clicked');
-
             const file = event.target.files?.[0];
             if (!file) return;
             inputFileHandler(file);
@@ -87,8 +86,8 @@ const InputComponent: React.FC<InputProps> = (props) => {
     const inputFileHandler = (file: File) => {
         if (!file) return;
 
-        if (getFileSizeMB(file.size) > maxFileSizeMB) {
-            alert(`File size exceeds ${maxFileSizeMB} MB`);
+        if (getFileSizeMB(file.size) > 1) {
+            alert(`File size exceeds 1 MB`);
             return;
         }
 
@@ -133,8 +132,30 @@ const InputComponent: React.FC<InputProps> = (props) => {
         };
     }
 
+    const registerProps = props.register ? props.register(props.name, props.rules) : {};
+
+    const attachRef = (e: HTMLInputElement) => {
+        if (props.ref) {
+            // Attach both RHF's ref and the forwarded ref
+            if ('ref' in registerProps) {
+                const r = registerProps.ref as React.Ref<HTMLInputElement>;
+                if (typeof r === 'function') {
+                    r(e);
+                } else if (r && 'current' in r) {
+                    r.current = e;
+                }
+            }
+
+            if (typeof props.ref === 'function') {
+                props.ref(e);
+            } else if ('current' in props.ref) {
+                props.ref.current = e;
+            }
+        }
+    }
+
     return (
-        <div className={`flex items-center ${layout} ${props.className?.container}`}>
+        <div className={`flex items-center ${layout} ${props.className?.container} `}>
             {
                 (props.displayLabel === undefined ? true : props.displayLabel) &&
                 <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'my-2' : 'mx-2'} ${props.className?.label}`} htmlFor={sanatizedName}>{props.name}</label>
@@ -143,18 +164,18 @@ const InputComponent: React.FC<InputProps> = (props) => {
             <div className={"text-left"}>
                 {
                     props.type === 'text' &&
-                    <input type="text" id={sanatizedName} value={inputValue as string} className={`${props.className?.input}`} onChange={inputChangeHandler} />
+                    <input type="text" id={sanatizedName} value={inputValue as string} {...registerProps} ref={attachRef} className={`${props.className?.input} `} onChange={inputChangeHandler} />
                 }
 
                 {
                     props.type === 'integer' &&
-                    <input type="number" id={sanatizedName} {...props.register!(props.name, rules.integer)}
+                    <input type="number" id={sanatizedName} {...registerProps} ref={attachRef}
                         step="1" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
                 {
                     props.type === 'decimal' &&
-                    <input type="number" id={sanatizedName} {...props.register!(props.name, rules.decimal)}
+                    <input type="number" id={sanatizedName} {...registerProps} ref={attachRef}
                         step="0.01" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
@@ -162,11 +183,12 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     props.type === 'zip' &&
                     <InputMask
                         mask="99999-9999"
+                        {...registerProps}
                         value={inputValue}
                         onChange={inputChangeHandler}
                         beforeMaskedStateChange={beforeMaskedStateChange}
                     >
-                        <input type="text" id={sanatizedName} placeholder='99999-9999' className={`${props.className?.input}`} />
+                        <input type="text" id={sanatizedName} placeholder='99999-9999' className={`${props.className?.input}`} ref={attachRef} />
                     </InputMask>
                 }
 
@@ -174,11 +196,11 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     props.type === 'date' &&
                     <InputMask
                         mask="99/99/9999"
-                        {...props.register!(props.name, rules.date)}
+                        {...registerProps}
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} />
+                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} ref={attachRef} />
                     </InputMask>
                 }
 
@@ -186,11 +208,11 @@ const InputComponent: React.FC<InputProps> = (props) => {
                     props.type === 'phone' &&
                     <InputMask
                         mask="(999) 999-9999"
-                        {...props.register!(props.name, rules.phone)}
+                        {...registerProps}
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' className={`${props.className?.input}`} />
+                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' className={`${props.className?.input}`} ref={attachRef} />
                     </InputMask>
                 }
 
@@ -201,7 +223,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100 cursor-pointer
                         checked:bg-primary-light checked:border-0
                         disabled:border-steel-400 disabled:bg-steel-400 `}
-                            checked={inputValue as boolean} onChange={inputChangeHandler} />
+                            checked={inputValue as boolean} onChange={inputChangeHandler} {...registerProps} ref={attachRef} />
                         <svg
                             className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -220,7 +242,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
                 {
                     props.type === 'password' &&
-                    <input type="password" id={sanatizedName} {...props.register!(props.name, props.matchValue ? rules.passwordMatch(props.matchValue!) : rules.password)}
+                    <input type="password" id={sanatizedName} {...registerProps} ref={attachRef}
                         placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} onChange={inputChangeHandler} />
                 }
 
@@ -234,8 +256,9 @@ const InputComponent: React.FC<InputProps> = (props) => {
                                     id={`radio-${props.name}-${key}`}
                                     value={key}
                                     className={`appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light ${props.className?.input}`}
-                                    {...props.register!(props.name, rules.radio)}
                                     checked={inputValue === key}
+                                    {...registerProps}
+                                    ref={attachRef}
                                     onChange={inputChangeHandler}
                                 />
                                 <label className='mr-2' htmlFor={`radio-${props.name}-${key}`} >
@@ -255,7 +278,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         style={{ position: 'relative' }}
                     >
                         <input type="file" id={sanatizedName} className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
-                            {...props.register!(props.name, rules.file(maxFileSizeMB))} onChange={inputChangeHandler} />
+                            {...registerProps} ref={attachRef} onChange={inputChangeHandler} />
                         <p className="text-secondary">
                             Drag & drop a file here, or click the button to select.
                         </p>
