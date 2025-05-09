@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, Bars3Icon, BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/solid'
+import dayjs, { Dayjs } from 'dayjs';
+import { AllowedCellValue, SortOrder, SortOrderDict } from "@/types";
 
 interface GridComponentProps {
     headers: string[];
-    rows: Array<Array<string | number>>;
+    rows: Array<Array<AllowedCellValue>>;
     columnSorting?: { [header: string]: boolean };
     columnWidth?: { [header: string]: string };
     allowPaginaton?: boolean;
@@ -11,12 +13,9 @@ interface GridComponentProps {
     pageSize?: number | Array<number>;
     className?: { container?: string, header?: string, cell?: string, footer?: string };
     renderHeaderCell?: (header: string, headerIndex: number) => React.ReactNode;
-    renderRow?: (row: Array<string | number>, rowIndex: number) => React.ReactNode;
-    renderCell?: (cell: string | number, headerName: string, rowIndex: number, cellIndex: number, row: Array<string | number>) => React.ReactNode;
+    renderRow?: (row: Array<AllowedCellValue>, rowIndex: number) => React.ReactNode;
+    renderCell?: (cell: AllowedCellValue, headerName: string, rowIndex: number, cellIndex: number, row: Array<AllowedCellValue>) => React.ReactNode;
 }
-
-type SortOrder = 'asc' | 'desc' | '';
-type SortOrderDict = { [idx: number]: SortOrder };
 
 const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderRow, renderCell }) => {
     // State to manage the table headers and rows
@@ -104,9 +103,9 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
         switch (newSortOrder) {
             case 'asc':
                 sortedRows = [...tableRows].sort((a, b) => {
-                    if (a[columnIndex] < b[columnIndex]) {
+                    if ((a[columnIndex] ?? '') < (b[columnIndex] ?? '')) {
                         return -1;
-                    } else if (a[columnIndex] > b[columnIndex]) {
+                    } else if ((a[columnIndex] ?? '') > (b[columnIndex] ?? '')) {
                         return 1;
                     }
                     return 0;
@@ -114,9 +113,9 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                 break;
             case 'desc':
                 sortedRows = [...tableRows].sort((a, b) => {
-                    if (a[columnIndex] > b[columnIndex]) {
+                    if ((a[columnIndex] ?? '') > (b[columnIndex] ?? '')) {
                         return -1;
-                    } else if (a[columnIndex] < b[columnIndex]) {
+                    } else if ((a[columnIndex] ?? '') < (b[columnIndex] ?? '')) {
                         return 1;
                     }
                     return 0;
@@ -174,7 +173,16 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                         <tr key={rowIndex} className={`bg-background text-text hover:bg-blue-100 transition-colors duration-200 ${className?.cell}`}>
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
-                                    {renderCell ? renderCell(cell, tableHeaders[cellIndex], rowIndex, cellIndex, row) : cell}
+                                    {renderCell ?
+                                        renderCell(cell, tableHeaders[cellIndex], rowIndex, cellIndex, row) :
+                                        <span className='block'>
+                                            {dayjs.isDayjs(cell)
+                                                ? cell.format('DD/MM/YYYY')
+                                                : typeof cell === 'object' && cell !== null
+                                                    ? JSON.stringify(cell)
+                                                    : cell}
+                                        </span>
+                                    }
                                 </td>
                             ))}
                         </tr>

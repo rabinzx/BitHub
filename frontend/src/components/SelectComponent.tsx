@@ -2,9 +2,8 @@ import React, { use, useEffect, useMemo, useRef } from 'react';
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import InputComponent from './InputComponent';
 import GridComponent from './GridComponent';
-import { set } from 'react-hook-form';
-
-type ReturnValueType = string | number | boolean | object;
+import dayjs, { Dayjs } from 'dayjs';
+import { AllowedCellValue } from "@/types";
 
 interface SelectComponentProps {
     options: Array<{ label: string; value: string } | object>;
@@ -17,7 +16,7 @@ interface SelectComponentProps {
     isComboBox?: boolean;
     comboBoxLabelField?: string;
     typeToSearch?: boolean;
-    onChange: (value: ReturnValueType | Array<ReturnValueType>) => void;
+    onChange: (value: AllowedCellValue) => void;
 }
 
 const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, typeToSearch, onChange }) => {
@@ -235,7 +234,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                             if (JSON.stringify(row).indexOf(searchText.toLowerCase()) === -1) {
                                                 return false // skip the row
                                             }
-                                            return null // fallback to use default settings
+                                            return null // fallback to use default render
                                         }}
                                         renderCell={(cell, headerName, rowIndex) => {
                                             if (headerName === '') {
@@ -248,9 +247,13 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                                 )
                                             } else {
                                                 return (
-                                                    <span className="text-sm font-normal cursor-pointer"
+                                                    <span className="text-sm font-normal cursor-pointer block"
                                                         onClick={() => listItemSelectedHandler(rowIndex, !optionsChecked[rowIndex])}>
-                                                        {cell}
+                                                        {dayjs.isDayjs(cell)
+                                                            ? cell.format('DD/MM/YYYY')
+                                                            : typeof cell === 'object' && cell !== null
+                                                                ? JSON.stringify(cell)
+                                                                : cell}
                                                     </span>
                                                 )
                                             }

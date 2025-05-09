@@ -10,10 +10,6 @@ import rules, { getFileSizeMB } from '../InputRules';
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 
-interface Dictionary {
-    [key: string]: string | number;
-}
-
 interface InputProps {
     type: string;
     value: string | number | boolean | File | null;
@@ -24,7 +20,7 @@ interface InputProps {
     name: string;
     displayLabel?: boolean;
     matchValue?: string;
-    multipleOptions?: Dictionary;
+    multipleOptions?: Record<string, any>;
     fileType?: string;
     layout?: string;
     className?: { container?: string, label?: string, input?: string };

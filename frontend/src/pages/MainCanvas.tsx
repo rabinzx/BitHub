@@ -49,8 +49,12 @@ const MainCanvas = () => {
 
     const [selectedCities, setSelectedCities] = useState<Array<string>>([]);
 
-    const updateCity = (value: string | Array<string>) => {
-        console.log("Selected city:", value);
+    const updateCity = (value: any) => {
+        if (Array.isArray(value)) {
+            console.log("multiple values:", value);
+        } else {
+            console.log("single value:", value);
+        }
     };
 
     const updatePerson = (key: string, value: string | number | boolean) => {
@@ -87,7 +91,9 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
-            <SelectComponent options={cityOptions2} typeToSearch={true} isComboBox={true} comboBoxLabelField="CityKey" className="md:w-[25rem] mb-4" allowMultiple={true} maxDropdownHeightInPX={150} placeholder="Select Cities" onChange={updateCity} />
+            <SelectComponent options={cityOptions} isComboBox={false} allowMultiple={true} typeToSearch={false}
+                comboBoxLabelField="CityName" className="md:w-[25rem] mb-4" maxDropdownHeightInPX={150}
+                placeholder="Select Cities" onChange={updateCity} />
 
             <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
                 className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}
@@ -101,20 +107,20 @@ const MainCanvas = () => {
                 renderCell={(cell, headerName) => {
                     switch (headerName) {
                         case 'EmpId':
-                            return <span className="text-blue-500">{cell}</span>;
+                            return <span className="text-blue-500">{String(cell)}</span>;
                         case 'EmpName':
-                            return <span className="text-green-500">{cell}</span>;
+                            return <span className="text-green-500">{String(cell)}</span>;
                         case 'Age':
-                            return <span className="text-red-500">{cell}</span>;
+                            return <span className="text-red-500">{Number(cell)}</span>;
                         case 'Salary':
                             return <span className="text-primary">{
                                 new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD'
-                                }).format(+cell)
+                                }).format(Number(cell))
                             }</span>;
                         default:
-                            return cell
+                            return <span>{String(cell)}</span>
                     }
                 }}
             />
