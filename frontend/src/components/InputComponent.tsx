@@ -131,17 +131,17 @@ const InputComponent: React.FC<InputProps> = (props) => {
     const registerProps = props.register ? props.register(props.name, props.rules) : {};
 
     const attachRef = (e: HTMLInputElement) => {
-        if (props.ref) {
-            // Attach both RHF's ref and the forwarded ref
-            if ('ref' in registerProps) {
-                const r = registerProps.ref as React.Ref<HTMLInputElement>;
-                if (typeof r === 'function') {
-                    r(e);
-                } else if (r && 'current' in r) {
-                    r.current = e;
-                }
+        // Attach both RHF's ref and the forwarded ref
+        if ('ref' in registerProps) {
+            const r = registerProps.ref as React.Ref<HTMLInputElement>;
+            if (typeof r === 'function') {
+                r(e);
+            } else if (r && 'current' in r) {
+                r.current = e;
             }
+        }
 
+        if (props.ref) {
             if (typeof props.ref === 'function') {
                 props.ref(e);
             } else if ('current' in props.ref) {

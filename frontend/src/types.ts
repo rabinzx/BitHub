@@ -10,3 +10,4 @@ export type SortOrder = 'asc' | 'desc' | '';
 
 export type SortOrderDict = { [idx: number]: SortOrder };
 
+export type ViewSize = 'sm' | 'md' | 'lg' | 'xl';

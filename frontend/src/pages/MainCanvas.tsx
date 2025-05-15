@@ -4,7 +4,9 @@ import CardComponent from "../components/CardComponent";
 import { useForm } from "react-hook-form";
 import GridComponent from "../components/GridComponent";
 import SelectComponent from "../components/SelectComponent";
+import ModalComponent from "@/components/ModelComponent";
 import rules from "../InputRules";
+import DraggableModal from "@/components/DraggableModal";
 
 
 const MainCanvas = () => {
@@ -86,11 +88,15 @@ const MainCanvas = () => {
         return [index + 1, 'John', getRandomIntInclusive(20, 60), 100_000];
     });
 
-
-
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
+
+            <ModalComponent hasBackdrop={true} displayModal={true} modalSize="md" title="Modal Title"
+            >
+                <div className="flex-1">modal content</div>
+            </ModalComponent>
+
             <SelectComponent options={cityOptions} isComboBox={false} allowMultiple={true} typeToSearch={false}
                 comboBoxLabelField="CityName" className="md:w-[25rem] mb-4" maxDropdownHeightInPX={150}
                 placeholder="Select Cities" onChange={updateCity} />
