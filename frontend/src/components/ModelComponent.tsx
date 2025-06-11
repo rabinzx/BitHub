@@ -14,9 +14,10 @@ interface ModalComponentProps {
     renderFooter?: () => React.ReactNode;
     submitHandler?: () => void;
     cancelHandler?: () => void;
+    modalCloseHandler?: () => void;
 }
 
-const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize, hasBackdrop, displayXmark, title, children, renderHeader, renderFooter, cancelHandler, submitHandler }) => {
+const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize, hasBackdrop, displayXmark, title, children, renderHeader, renderFooter, cancelHandler, submitHandler, modalCloseHandler }) => {
     const modalRoot = document.getElementById('modal-root');
 
     const getViewportCenter = (): { x: number, y: number } => {
@@ -93,6 +94,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize
 
     const closeModal = () => {
         setDisplayModalState(false);
+        modalCloseHandler && modalCloseHandler();
     };
 
     return (
@@ -110,7 +112,6 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize
                                 top: position.y,
                                 left: position.x,
                                 transform: 'translateX(-50%) translateY(-50%)',
-
                             }}
                         >
                             <div className='basis-10 border-b unselectable p-2 flex justify-between'
@@ -131,7 +132,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize
                                         </>
                                 }
                             </div>
-                            <div className='flex-1 flex'>
+                            <div className='flex-1 flex px-2'>
                                 {children}
                             </div>
                             <div className='basis-10 border-t flex justify-end items-center gap-4 p-2'>
