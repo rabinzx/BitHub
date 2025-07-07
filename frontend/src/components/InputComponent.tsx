@@ -64,7 +64,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
             tempVal = Number(parseFloat(event.target.value).toFixed(2));
             if (isNaN(tempVal as number)) return;
         }
-        else if (props.type === 'checkbox') {
+        else if (props.type === 'checkbox' || props.type === 'checkbox2') {
             tempVal = event.target.checked;
         }
         else if (props.type === 'file') {
@@ -128,19 +128,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
         };
     }
 
-    const registerProps = props.register ? props.register(props.name, props.rules) : {};
-
-    const attachRef = (e: HTMLInputElement) => {
-        // Attach both RHF's ref and the forwarded ref
-        if ('ref' in registerProps) {
-            const r = registerProps.ref as React.Ref<HTMLInputElement>;
-            if (typeof r === 'function') {
-                r(e);
-            } else if (r && 'current' in r) {
-                r.current = e;
-            }
-        }
-
+    const customRef = (e: HTMLInputElement | null) => {
         if (props.ref) {
             if (typeof props.ref === 'function') {
                 props.ref(e);
@@ -148,6 +136,36 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 props.ref.current = e;
             }
         }
+    }
+
+    // Register props for react-hook-form, attaching custom onChange handler
+    let registerProps = props.register
+        ? props.register(props.name, {
+            ...props.rules,
+            // Custom onChange handler https://stackoverflow.com/a/69448858
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandler(e),
+        })
+        : {
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandler(e)
+        };
+
+    // Get a reference to the original ref if it exists
+    const originalRef = 'ref' in registerProps
+        ? registerProps.ref as React.Ref<HTMLInputElement | null>
+        : null;
+
+    // If a ref is provided in registerProps, allow customRef piggy back after original ref (https://stackoverflow.com/a/71497701)
+    if ('ref' in registerProps) {
+        registerProps.ref = (e: HTMLInputElement | null) => {
+            if (typeof originalRef === 'function') {
+                originalRef(e);
+            }
+            // custom ref handling
+            customRef(e);
+        }
+    } else {
+        // If no ref is provided in registerProps, just use customRef
+        registerProps = { ...registerProps, ref: customRef };
     }
 
     return (
@@ -160,19 +178,19 @@ const InputComponent: React.FC<InputProps> = (props) => {
             <div className={"text-left"}>
                 {
                     props.type === 'text' &&
-                    <input type="text" id={sanatizedName} value={inputValue as string} {...registerProps} ref={attachRef} className={`${props.className?.input} `} onChange={inputChangeHandler} />
+                    <input type="text" id={sanatizedName} value={inputValue as string} {...registerProps} className={`${props.className?.input} `} />
                 }
 
                 {
                     props.type === 'integer' &&
-                    <input type="number" id={sanatizedName} {...registerProps} ref={attachRef}
-                        step="1" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
+                    <input type="number" id={sanatizedName} {...registerProps}
+                        step="1" value={inputValue as number} className={`${props.className?.input}`} />
                 }
 
                 {
                     props.type === 'decimal' &&
-                    <input type="number" id={sanatizedName} {...registerProps} ref={attachRef}
-                        step="0.01" value={inputValue as number} className={`${props.className?.input}`} onChange={inputChangeHandler} />
+                    <input type="number" id={sanatizedName} {...registerProps}
+                        step="0.01" value={inputValue as number} className={`${props.className?.input}`} />
                 }
 
                 {
@@ -181,10 +199,9 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         mask="99999-9999"
                         {...registerProps}
                         value={inputValue}
-                        onChange={inputChangeHandler}
                         beforeMaskedStateChange={beforeMaskedStateChange}
                     >
-                        <input type="text" id={sanatizedName} placeholder='99999-9999' className={`${props.className?.input}`} ref={attachRef} />
+                        <input type="text" id={sanatizedName} placeholder='99999-9999' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
@@ -196,7 +213,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} ref={attachRef} />
+                        <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
@@ -208,7 +225,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         value={inputValue}
                         onChange={inputChangeHandler}
                     >
-                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' className={`${props.className?.input}`} ref={attachRef} />
+                        <input type="tel" id={sanatizedName} placeholder='(999) 999-9999' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
@@ -219,7 +236,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         focus:outline-none focus:ring-offset-0 focus:ring-1 focus:ring-blue-100 cursor-pointer
                         checked:bg-primary-light checked:border-0
                         disabled:border-steel-400 disabled:bg-steel-400 `}
-                            checked={inputValue as boolean} onChange={inputChangeHandler} {...registerProps} ref={attachRef} />
+                            checked={inputValue as boolean} {...registerProps} />
                         <svg
                             className="absolute w-4 h-4 pointer-events-none hidden peer-checked:block stroke-white outline-none"
                             xmlns="http://www.w3.org/2000/svg"
@@ -238,8 +255,8 @@ const InputComponent: React.FC<InputProps> = (props) => {
 
                 {
                     props.type === 'password' &&
-                    <input type="password" id={sanatizedName} {...registerProps} ref={attachRef}
-                        placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} onChange={inputChangeHandler} />
+                    <input type="password" id={sanatizedName} {...registerProps}
+                        placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} />
                 }
 
                 {
@@ -254,8 +271,6 @@ const InputComponent: React.FC<InputProps> = (props) => {
                                     className={`appearance-none w-4 h-4 rounded-full bg-background border-2 border-blue-300 checked:bg-primary-light ${props.className?.input}`}
                                     checked={inputValue === key}
                                     {...registerProps}
-                                    ref={attachRef}
-                                    onChange={inputChangeHandler}
                                 />
                                 <label className='mr-2' htmlFor={`radio-${props.name}-${key}`} >
                                     {value}
@@ -274,7 +289,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         style={{ position: 'relative' }}
                     >
                         <input type="file" id={sanatizedName} className='max-w-[90%]' style={{ position: 'absolute', top: '0.5rem' }} accept={props.fileType || 'image/*'}
-                            {...registerProps} ref={attachRef} onChange={inputChangeHandler} />
+                            {...registerProps} />
                         <p className="text-secondary">
                             Drag & drop a file here, or click the button to select.
                         </p>
