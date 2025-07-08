@@ -6,9 +6,8 @@ import GridComponent from "../components/GridComponent";
 import SelectComponent from "../components/SelectComponent";
 import ModalComponent from "@/components/ModelComponent";
 import rules from "../InputRules";
-import DraggableModal from "@/components/DraggableModal";
 import LoadingComponent from "@/components/LoadingComponent";
-
+import { Link } from "react-router-dom";
 
 const MainCanvas = () => {
     const [person, setPerson] = useState({
@@ -94,6 +93,8 @@ const MainCanvas = () => {
     return (
         <div className="flex flex-col items-center justify-center g-gray-100">
             <h1 className="text-3xl font-bold mb-4">Main Canvas</h1>
+
+            <Link to="/sidepage">Side Page</Link>
 
             <LoadingComponent />
 

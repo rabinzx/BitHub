@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import { Routes, Route } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import './App.css'
 import MainCanvas from './pages/MainCanvas';
+import SidePage from './pages/SidePage';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -77,14 +78,8 @@ function App() {
 
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-250 p-6 bg-gray-100 -ml-[250px] ${isSidebarOpen && "md:ml-0"}`}>
-          <h2 className="text-2xl font-bold mb-4">Welcome to My Landing Page</h2>
-          <p className="text-gray-700">
-            This is a fully responsive landing page with a top header, left sidebar, and sticky footer.
-          </p>
-
-          {/* Main Canvas Page */}
-          <MainCanvas />
-
+          {/* Route outlet */}
+          <Outlet />
         </main>
       </div>
       {/* Footer */}
