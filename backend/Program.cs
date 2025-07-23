@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Configuration
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true) 
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true) 
+        .AddEnvironmentVariables();
 
 // Add CORS policy (Cross-Origin Resource Sharing) to allow requests from the React app
 builder.Services.AddCors(options =>
@@ -17,6 +27,28 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<ICryptography, Cryptography>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSection = builder.Configuration.GetSection("Jwt");
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSection["Issuer"]!,
+            ValidAudience = jwtSection["Issuer"]!,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]!))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
 
 
 var app = builder.Build();
@@ -30,25 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-// app.MapGet("/weatherforecast", () =>
-// {
-//     var forecast =  Enumerable.Range(1, 5).Select(index =>
-//         new WeatherForecast
-//         (
-//             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//             Random.Shared.Next(-20, 55),
-//             summaries[Random.Shared.Next(summaries.Length)]
-//         ))
-//         .ToArray();
-//     return forecast;
-// })
-// .WithName("GetWeatherForecast")
-// .WithOpenApi();
+app.UseCors(); // Enable CORS policy
 
 app.Use(async (context, next) =>
 {
@@ -61,12 +75,28 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.MapGet("/", () => "ASP.NET 8 API Home Page!");
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Cookies["Authorization"];
+
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers.Authorization = $"Bearer {token}";
+    }
+
+    await next();
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // This endpoint returns a nonce value that can be used in the CSP header for inline scripts
-app.MapGet("/api/nonce", (HttpContext context) => {
+app.MapGet("/api/nonce", (HttpContext context) =>
+{
     return Results.Json(new { nonce = context.Items["CSP-Nonce"] });
 });
+
+app.MapControllers();
 
 app.MapGet("/api/sayhello", () => Results.Json(new {msg = "Hello from ASP.NET 8 API!"}));
 
