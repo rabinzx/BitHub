@@ -17,6 +17,7 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+    const [authMessage, setAuthMessage] = useState("");
 
     const [loginData, setLoginData] = useState({
         username: '',
@@ -29,22 +30,23 @@ const LoginForm = () => {
                 if (r.data) {
                     const data = r.data;
                     if (data.result === 'success') {
-                        const { access_token, expires_in } = data.message;
+                        const { access_token, expires_in } = data.resultData;
                         const _userInfo = {
                             access_token: access_token,
                             expires_in: dayjs().add(expires_in, 'seconds').toISOString(),
                         };
                         dispatch(setUserInfo(_userInfo));
+                        setAuthMessage(""); // Clear any previous error message
                         // Optionally redirect to home page or dashboard
-                        //navigate('/main'); // Redirect to home page on success
+                        navigate('/main'); // Redirect to home page on success
                     } else {
-                        alert(data.message); // Show error message from API
+                        setAuthMessage(data.externalMessage || "Login failed"); // Show error message from API
                     }
                 }
             });
     }
 
-    const testButtonHandler = () => {
+    const registerHandler = () => {
         axiosInstance.get('/auth/logintest').then(r => {
             console.log("Test login successful:", r.data);
         })
@@ -86,28 +88,33 @@ const LoginForm = () => {
                     onChange={(val) => { setLoginData({ ...loginData, password: val as string }) }}
                     className={{ container: 'mb-4 justify-end' }}
                 />
-                <div className='mb-4'>
+                <div className='my-2'>
                     <button
                         type="submit"
-                        className={`w-full py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={loading}
                     >
                         {loading ? <LoadingComponent /> : 'Login'}
                     </button>
                 </div>
-                <div>
+                <div className='my-2'>
                     <button
                         type="button"
-                        className={`w-full py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={loading}
-                        onClick={testButtonHandler}
+                        onClick={registerHandler}
                     >
                         New User? Register
                     </button>
                 </div>
-                <div>
-                    {JSON.stringify(userInfo)}
-                </div>
+                {authMessage.length > 0 &&
+                    <div className='mt-4'>
+                        <label className='py-2 bg-warning p-2 rounded-md'>
+                            {authMessage}
+                        </label>
+                    </div>
+                }
+
             </form>
         </CardComponent>
     );

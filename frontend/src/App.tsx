@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import './App.css'
 import MainCanvas from './pages/MainCanvas';
 import SidePage from './pages/SidePage';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearUserInfo } from './store/authSlice';
+import { RootState } from './store/store';
 
 function App() {
   const [count, setCount] = useState(0)
   const [nonce, setNonce] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userInfo = useSelector((state: RootState) => state.auth.userInfo);
 
   const sidebarOpenHandler = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -41,16 +45,30 @@ function App() {
     }
   }, [nonce]);
 
+  const logOffHandler = () => {
+    dispatch(clearUserInfo());
+    navigate('/'); // Redirect to login page
+  }
+
   return (
     <div className="flex flex-col min-h-screen drop-shadow-md" >
       {/* Header */}
       <header className="bg-blue-600 text-white p-4 top-0 w-full flex justify-between items-center">
         <h2 className="text-lg font-bold">BitHub</h2>
-        <button aria-hidden="true"
-          onClick={sidebarOpenHandler}
-        >
-          Menu
-        </button>
+        {userInfo &&
+          <div>
+            <button className='mr-4!'
+              onClick={sidebarOpenHandler}
+            >
+              Menu
+            </button>
+            <button
+              onClick={logOffHandler}
+            >
+              Log Off
+            </button>
+          </div>
+        }
       </header>
 
       {/* Layout Wrapper */}

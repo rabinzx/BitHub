@@ -20,7 +20,7 @@ public class AuthController : ControllerBase
         var result = new
         {
             result = "error",
-            message = "Login failed",
+            externalMessage = "Login failed",
         };
 
         // Access properties dynamically
@@ -47,7 +47,7 @@ public class AuthController : ControllerBase
                 return Ok(new
                 {
                     result = "success",
-                    message = new 
+                    resultData = new 
                     {
                         access_token = token,
                         expires_in = exipres_in_hours * 3600 // Token expiration time in seconds
@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
             result = new
             {
                 result = "error",
-                message = "Invalid request format",
+                externalMessage = "Invalid request format",
             };
         }
 
