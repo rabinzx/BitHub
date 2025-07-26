@@ -5,7 +5,7 @@ interface LoadingComponentProps {
     title?: string;
 }
 
-const LoadingComponent: React.FC<LoadingComponentProps> = ({ visibility, title }) => {
+const LoadingComponent: React.FC<LoadingComponentProps> = ({ visibility = true, title }) => {
 
     return (
         <>

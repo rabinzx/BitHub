@@ -47,7 +47,7 @@ public class AuthController : ControllerBase
                 return Ok(new
                 {
                     result = "success",
-                    resultData = new 
+                    resultData = new
                     {
                         access_token = token,
                         expires_in = exipres_in_hours * 3600 // Token expiration time in seconds

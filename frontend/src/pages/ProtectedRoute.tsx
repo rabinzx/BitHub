@@ -1,5 +1,7 @@
-import { RootState } from '@/store/store';
-import { useSelector } from 'react-redux';
+
+import { selectIsTokenExpired } from '@/store/authSelectors';
+import { clearUserInfo } from '@/store/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
 
 type ProtectedRouteProps = {
@@ -7,9 +9,11 @@ type ProtectedRouteProps = {
 };
 
 const ProtectedRoute = ({ redirectPath = '/' }: ProtectedRouteProps) => {
-    const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+    const isExpired = useSelector(selectIsTokenExpired);
+    const dispatch = useDispatch();
 
-    if (!userInfo) {
+    if (isExpired) {
+        dispatch(clearUserInfo());
         return <Navigate to={redirectPath} replace />;
     }
     return <Outlet />;

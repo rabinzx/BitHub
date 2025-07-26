@@ -96,8 +96,6 @@ const MainCanvas = () => {
 
             <Link to="/sidepage">Side Page</Link>
 
-            <LoadingComponent />
-
             <div className="my-2">
                 <button type="button" onClick={() => setDisplayModal(true)}>Display modal</button>
                 <ModalComponent hasBackdrop={true} displayModal={displayModal} modalSize="md" title="Modal Title" modalCloseHandler={() => setDisplayModal(false)}

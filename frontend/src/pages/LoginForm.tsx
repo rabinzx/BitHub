@@ -25,7 +25,7 @@ const LoginForm = () => {
     });
 
     const loginHandler = () => {
-        axiosInstance.post('/auth/login', loginData)
+        return axiosInstance.post('/auth/login', loginData)
             .then(r => {
                 if (r.data) {
                     const data = r.data;
@@ -55,18 +55,14 @@ const LoginForm = () => {
 
     const onSubmit = () => {
         setLoading(true);
-        try {
-            loginHandler();
-            //navigate('/'); // Redirect to home page on success
-        } catch (error) {
-            console.error("Login failed:", error);
-        } finally {
+        loginHandler().then(() => {
             setLoading(false);
-        }
+        });
     };
 
     return (
         <CardComponent className="max-w-96 mx-auto mt-10 p-6 bg-white shadow-md rounded-lg" title={<span className="text-2xl font-bold mb-6">Login</span>} >
+            <LoadingComponent visibility={loading} />
             <form onSubmit={handleSubmit(onSubmit)} className=''>
                 <InputComponent
                     name="Username"
@@ -94,14 +90,14 @@ const LoginForm = () => {
                         className={`w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={loading}
                     >
-                        {loading ? <LoadingComponent /> : 'Login'}
+                        Login
                     </button>
                 </div>
                 <div className='my-2'>
                     <button
                         type="button"
-                        className={`w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loading}
+                        className={`w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700 ${'opacity-50 cursor-not-allowed'}`}
+                        disabled
                         onClick={registerHandler}
                     >
                         New User? Register

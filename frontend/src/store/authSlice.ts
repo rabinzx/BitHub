@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
-  userInfo: any; // Adjust type as needed
+  userInfo: {access_token : string, expires_in: string} | null; // Adjust type as needed
 }
 
 const initialState: AuthState = {

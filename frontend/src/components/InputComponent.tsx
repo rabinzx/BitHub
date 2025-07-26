@@ -178,7 +178,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
             <div className={"text-left"}>
                 {
                     props.type === 'text' &&
-                    <input type="text" id={sanatizedName} value={inputValue as string} {...registerProps} className={`${props.className?.input} `} />
+                    <input type="text" id={sanatizedName} value={inputValue as string} {...registerProps} className={`${props.className?.input} `} autoComplete='new' />
                 }
 
                 {
@@ -256,7 +256,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
                 {
                     props.type === 'password' &&
                     <input type="password" id={sanatizedName} {...registerProps}
-                        placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} />
+                        placeholder='*********' value={inputValue as string} className={`${props.className?.input}`} autoComplete='new' />
                 }
 
                 {
