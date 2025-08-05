@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import './App.css'
 import MainCanvas from './pages/MainCanvas';
 import SidePage from './pages/SidePage';
+import ThemeSelect from './components/ThemeSelect';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -44,20 +45,23 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen drop-shadow-md" >
       {/* Header */}
-      <header className="bg-blue-600 text-white p-4 top-0 w-full flex justify-between items-center">
+      <header className="bg-blue-600 p-4 top-0 w-full flex justify-between items-center">
         <h2 className="text-lg font-bold">BitHub</h2>
-        <button aria-hidden="true"
-          onClick={sidebarOpenHandler}
-        >
-          Menu
-        </button>
+        <div className='flex gap-2'>
+          <ThemeSelect />
+          <button aria-hidden="true"
+            onClick={sidebarOpenHandler}
+          >
+            Menu
+          </button>
+        </div>
       </header>
 
       {/* Layout Wrapper */}
       <div className="flex flex-1" >
         {/* Sidebar */}
         <aside
-          className={`bg-gray-800 text-white relative z-50 w-[250px] flex-shrink-0 transform transition-transform duration-250 ease-in-out
+          className={`bg-gray-800 relative z-50 w-[250px] flex-shrink-0 transform transition-transform duration-250 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <nav className="space-y-4">
@@ -77,13 +81,13 @@ function App() {
         </aside>
 
         {/* Main Content */}
-        <main className={`flex-1 transition-all duration-250 p-6 bg-gray-100 -ml-[250px] ${isSidebarOpen && "md:ml-0"}`}>
+        <main className={`flex-1 transition-all duration-250 p-6 -ml-[250px] ${isSidebarOpen && "md:ml-0"}`}>
           {/* Route outlet */}
           <Outlet />
         </main>
       </div>
       {/* Footer */}
-      <footer className="flex-shrink-0 bg-blue-600 text-white text-center p-3 ">
+      <footer className="flex-shrink-0 bg-blue-600 text-center p-3 ">
         © 2025 BitHub. All rights reserved.
       </footer>
     </div>

@@ -48,7 +48,7 @@ const LoginForm = () => {
                 />
                 <button
                     type="submit"
-                    className={`w-full py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full py-2 mt-4 bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={loading}
                 >
                     {loading ? <LoadingComponent /> : 'Login'}
