@@ -170,7 +170,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                     {currentRows.map((row, rowIndex) => (
                         // allow the parent to use default settings if renderRow(row, rowIndex) returns null
                         (renderRow && renderRow(row, rowIndex)) ??
-                        <tr key={rowIndex} className={`bg-background text-text hover:bg-blue-100 transition-colors duration-200 ${className?.cell}`}>
+                        <tr key={rowIndex} className={`bg-background text-text hover:bg-hover transition-colors duration-200 ${className?.cell}`}>
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
                                     {renderCell ?
@@ -190,7 +190,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                 </tbody>
                 {allowPaginaton &&
                     <tfoot className='text-sm'>
-                        <tr className={`bg-blue-100 ${className?.footer}`}>
+                        <tr className={`bg-primary ${className?.footer}`}>
                             <td className='border p-2' colSpan={columnCount}>
                                 <div className='flex justify-end items-center gap-4'>
                                     {allowPageSizeChange &&

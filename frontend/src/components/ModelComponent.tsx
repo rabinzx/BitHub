@@ -102,7 +102,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ displayModal, modalSize
             <>
                 {
                     displayModalState &&
-                    <div className={`fixed inset-0 ${hasBackdrop && 'bg-[rgba(0,0,0,0.2)]'} z-50 overflow-hidden`}>
+                    <div className={`fixed inset-0 ${hasBackdrop && 'backdrop'} z-50 overflow-hidden`}>
                         <div
                             className={`flex flex-col shadow-md rounded-md overflow-hidden bg-background`}
                             style={{

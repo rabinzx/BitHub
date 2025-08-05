@@ -112,7 +112,7 @@ const MainCanvas = () => {
                 placeholder="Select Cities" onChange={updateCity} />
 
             <GridComponent headers={headerTest} rows={rowsTest} allowPageSizeChange={true}
-                className={{ container: 'mb-4 w-130', cell: 'even:bg-green-50 odd:bg-blue-50' }}
+                className={{ container: 'mb-4 w-130' }}
                 columnWidth={{ 'Salary': 'w-[150px]' }}
                 allowPaginaton={true}
                 renderHeaderCell={(header, headerIndex) => {

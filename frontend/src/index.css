@@ -5,14 +5,15 @@
   
   /* Colors */
   --color-primary: light-dark(#4f46e5, #86a7fb); /* Indigo */
-  --color-link: #6366f1;
-  --color-secondary: #6b7280;
+  --color-hover: light-dark(#7d7fcc, #9496c9); /* Indigo */
+  --color-secondary: light-dark(#6b7280, #9ca3af); /* Gray */
   --color-text: light-dark(#000000, #ffffff);
   --color-background: light-dark(#ffffff, #1F1F1F);
   --color-border: light-dark(#696969, #858585);
   --color-success: #10b981; /* Emerald */
   --color-error: #ef4444;
   --color-warning: #ffd044;
+
 
   /* Typography */
   --font-family-sans: 'Inter', 'Segoe UI', sans-serif;
@@ -143,3 +144,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.backdrop {
+  background-color: light-dark(rgba(0,0,0,0.2), rgba(255,255,255,0.2));
+}

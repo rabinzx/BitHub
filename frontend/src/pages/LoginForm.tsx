@@ -26,7 +26,7 @@ const LoginForm = () => {
     };
 
     return (
-        <CardComponent className="max-w-96 mx-auto mt-10 p-6 bg-white shadow-md rounded-lg" title={<span className="text-2xl font-bold mb-6">Login</span>} >
+        <CardComponent className="max-w-96 mx-auto mt-10 p-6 shadow-md rounded-lg" title={<span className="text-2xl font-bold mb-6">Login</span>} >
             <form onSubmit={handleSubmit(onSubmit)} className=''>
                 <InputComponent
                     name="Username"
@@ -48,7 +48,7 @@ const LoginForm = () => {
                 />
                 <button
                     type="submit"
-                    className={`w-full py-2 mt-4 bg-blue-600 rounded hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full py-2 mt-4 bg-primary rounded hover:bg-hover! ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={loading}
                 >
                     {loading ? <LoadingComponent /> : 'Login'}
