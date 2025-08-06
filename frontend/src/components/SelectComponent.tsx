@@ -210,7 +210,7 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                                             }
 
                                             return (
-                                                <li key={index} className='w-full hover:bg-gray-200 rounded-md'>
+                                                <li key={index} className='w-full rounded-md'>
                                                     <InputComponent type="checkbox"
                                                         name={'label' in option ? option.label : ''}
                                                         value={optionsChecked[index]}

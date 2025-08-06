@@ -147,7 +147,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
 
 
     return (
-        <div className={`overflow-x-auto shadow-md rounded-md border bg-background ${className?.container}`} >
+        <div className={`overflow-x-auto shadow-md rounded-md border ${className?.container}`} >
             <table className='border-collapse min-w-50 w-full '>
                 <colgroup>
                     {tableHeaders.map((header, headerIndex) => (
@@ -155,7 +155,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                     ))}
                 </colgroup>
                 <thead>
-                    <tr className={`bg-background ${className?.header}`}>
+                    <tr className={`${className?.header}`}>
                         {tableHeaders.map((header, headerIndex) => (
                             <th key={headerIndex} className={`border rounded-lg p-2`}>
                                 {renderHeaderCell ? renderHeaderCell(header, headerIndex) : <span>{header}</span>}
@@ -170,7 +170,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                     {currentRows.map((row, rowIndex) => (
                         // allow the parent to use default settings if renderRow(row, rowIndex) returns null
                         (renderRow && renderRow(row, rowIndex)) ??
-                        <tr key={rowIndex} className={`bg-background text-text hover:bg-hover transition-colors duration-200 ${className?.cell}`}>
+                        <tr key={rowIndex} className={`hover:bg-hover transition-colors duration-200 ${className?.cell}`}>
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
                                     {renderCell ?

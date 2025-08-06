@@ -4,16 +4,16 @@
   --breakpoint-3xl: 1920px;
   
   /* Colors */
-  --color-primary: light-dark(#4f46e5, #86a7fb); /* Indigo */
-  --color-hover: light-dark(#7d7fcc, #9496c9); /* Indigo */
-  --color-secondary: light-dark(#6b7280, #9ca3af); /* Gray */
+  --color-primary: light-dark(#86a7fb, #4f46e5); /* Indigo */
+  --color-hover: light-dark(#7895e0, #453ec3); 
+  --color-secondary: light-dark(#b8b8b8, #6c6c6c ); /* Gray */
   --color-text: light-dark(#000000, #ffffff);
   --color-background: light-dark(#ffffff, #1F1F1F);
-  --color-border: light-dark(#696969, #858585);
+  --color-border: light-dark(#858585, #9c9c9c);
   --color-success: #10b981; /* Emerald */
   --color-error: #ef4444;
   --color-warning: #ffd044;
-
+  --color-site: light-dark(#189ab4, #05445e); /* https://www.canva.com/colors/color-palettes/summer-splash/ */
 
   /* Typography */
   --font-family-sans: 'Inter', 'Segoe UI', sans-serif;
@@ -75,19 +75,13 @@
   color-scheme: dark; 
 }
 
-div, table, span, p, 
-h1, h2, h3, h4, h5, h6, a 
-table, th, tr, td {
+/* browsers apply their own default styles to form controls */
+*, *::before, *::after, input, textarea, select, button {
   border-color: var(--color-border);
 }
 
-a {
-  font-weight: 500;
-  color: var(--color-link);
-  text-decoration: inherit;
-}
-a:hover {
-  color: var(--color-primary)
+select {
+  background: var(--color-background);
 }
 
 body {
@@ -98,28 +92,19 @@ body {
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-.unselectable {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+a {
+  font-weight: 500;
+  text-decoration: inherit;
 }
 
 input:not([type=checkbox]):not([type=radio])  {
   border-radius: 8px;
-  border: 1px solid var(--color-border);
+  border-width: 1px;
+  border-style: solid;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--color-background);
   transition: border-color 0.25s;
 }
 
@@ -131,17 +116,31 @@ button {
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  color: var(--color-background);
   background: var(--color-primary);
   transition: border-color 0.25s;
 }
 
-button:hover {
-  background: var(--color-link);
+button:hover, li:hover {
+  background-color: var(--color-hover);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Custom classes */
+.header-footer {
+  background-color: var(--color-site);
+}
+
+.unselectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .backdrop {

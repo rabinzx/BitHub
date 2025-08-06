@@ -1,0 +1,15 @@
+.sidebar {
+    border: 5px inset var(--color-border);
+    border-left: 0;
+    background: light-dark(#189ab4, #05445e);
+}
+
+.sidebar a {
+    display: block;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.sidebar a:hover {
+    background: light-dark(#d4f1f4, #75e6da);
+}
