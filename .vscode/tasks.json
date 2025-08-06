@@ -17,6 +17,22 @@
           "kind": "build",
           "isDefault": true
         }
+      },
+      {
+        "label": "Start Backend",
+        "type": "shell",
+        "command": "dotnet watch run",
+        "options": {
+          "cwd": "${workspaceFolder}/backend" 
+        },
+        "runOptions": {
+            "runOn": "folderOpen"
+        },
+        "problemMatcher": [],
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        }
       }
     ]
   }

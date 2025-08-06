@@ -61,6 +61,7 @@
 /backend/*.db
 /backend/*.sqlite
 /backend/*.sqlite3
+/backend/appsettings.local.json
 
 # Miscellaneous
 *.swp

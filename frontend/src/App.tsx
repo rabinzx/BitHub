@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import './App.css'
 import MainCanvas from './pages/MainCanvas';
 import SidePage from './pages/SidePage';
 import ThemeSelect from './components/ThemeSelect';
 import SideBar from './components/SideBar';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearUserInfo } from './store/authSlice';
+import { RootState } from './store/store';
 
 function App() {
   const [count, setCount] = useState(0)
   const [nonce, setNonce] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userInfo = useSelector((state: RootState) => state.auth.userInfo);
 
   const sidebarOpenHandler = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -43,19 +47,31 @@ function App() {
     }
   }, [nonce]);
 
+  const logOffHandler = () => {
+    dispatch(clearUserInfo());
+    navigate('/'); // Redirect to login page
+  }
+
   return (
     <div className="flex flex-col min-h-screen drop-shadow-md" >
       {/* Header */}
       <header className="header-footer p-4 top-0 w-full flex justify-between items-center">
         <h2 className="text-lg font-bold">BitHub</h2>
-        <div className='flex gap-2'>
-          <ThemeSelect />
-          <button aria-hidden="true"
-            onClick={sidebarOpenHandler}
-          >
-            Menu
-          </button>
-        </div>
+        {userInfo &&
+          <div className='flex gap-2'>
+            <ThemeSelect />
+            <button className='mr-4!'
+              onClick={sidebarOpenHandler}
+            >
+              Menu
+            </button>
+            <button
+              onClick={logOffHandler}
+            >
+              Log Off
+            </button>
+          </div>
+        }
       </header>
 
       {/* Layout Wrapper */}
