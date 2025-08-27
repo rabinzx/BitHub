@@ -10,6 +10,7 @@ import SideBar from './components/SideBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearUserInfo } from './store/authSlice';
 import { RootState } from './store/store';
+import axiosInstance from './api/axiosInstance';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -49,7 +50,9 @@ function App() {
 
   const logOffHandler = () => {
     dispatch(clearUserInfo());
-    navigate('/'); // Redirect to login page
+    axiosInstance.post('/auth/logoff').then(r => {
+      navigate('/'); // Redirect to login page
+    });
   }
 
   return (
