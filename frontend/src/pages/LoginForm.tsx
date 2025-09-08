@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUserInfo, clearUserInfo } from '@/store/authSlice';
 import { RootState } from '@/store/store';
 import dayjs from 'dayjs';
+import rules from "../InputRules";
+import classes from './LoginForm.module.css';
 
 const LoginForm = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -17,11 +19,13 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const userInfo = useSelector((state: RootState) => state.auth.userInfo);
-    const [authMessage, setAuthMessage] = useState("");
+    const [authMessage, setAuthMessage] = useState({ result: '', externalMessage: '' });
+    const [showRegisterForm, setShowRegisterForm] = useState(false);
 
     const [loginData, setLoginData] = useState({
         username: '',
-        password: ''
+        password: '',
+        passwordConfirmation: ''
     });
 
     const loginHandler = () => {
@@ -36,19 +40,25 @@ const LoginForm = () => {
                             expires_in: dayjs().add(expires_in, 'seconds').toISOString(),
                         };
                         dispatch(setUserInfo(_userInfo));
-                        setAuthMessage(""); // Clear any previous error message
+                        setAuthMessage({ result: '', externalMessage: '' }); // Clear any previous error message
                         // Optionally redirect to home page or dashboard
                         navigate('/main'); // Redirect to home page on success
                     } else {
-                        setAuthMessage(data.externalMessage || "Login failed"); // Show error message from API
+                        const { result, externalMessage } = data;
+                        setAuthMessage({ result, externalMessage }); // Show error message from API
                     }
                 }
             });
     }
 
     const registerHandler = () => {
-        axiosInstance.get('/auth/logintest').then(r => {
-            console.log("Test login successful:", r.data);
+        setLoading(true);
+        var { passwordConfirmation, ...loginDataClean } = loginData;
+        axiosInstance.post('/auth/RegisterUser', loginDataClean).then(r => {
+            const data = r.data;
+            const { result, externalMessage } = data;
+            setAuthMessage({ result, externalMessage })
+            setLoading(false);
         })
 
     }
@@ -84,35 +94,60 @@ const LoginForm = () => {
                     onChange={(val) => { setLoginData({ ...loginData, password: val as string }) }}
                     className={{ container: 'mb-4 justify-end' }}
                 />
-                <div className='my-2'>
-                    <button
-                        type="submit"
-                        className={`w-full py-2 text-white bg-primary rounded hover:bg-hover! ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={loading}
-                    >
-                        Login
-                    </button>
-                </div>
+                {
+                    showRegisterForm ?
+                        <>
+                            <InputComponent
+                                name="Confirm Password"
+                                type="password"
+                                register={register}
+                                rules={loginData.password ? rules.passwordMatch(loginData.password) : rules.password}
+                                errors={errors}
+                                value={loginData.passwordConfirmation}
+                                onChange={(val) => { setLoginData({ ...loginData, passwordConfirmation: val as string }) }}
+                                className={{ container: 'mb-4 justify-end' }}
+                            />
+                            <div className='my-2'>
+                                <button
+                                    type="button"
+                                    className={`w-full py-2`}
+                                    disabled={loading}
+                                    onClick={registerHandler}
+                                >
+                                    Register
+                                </button>
+                            </div>
+                        </>
+                        :
+                        <div className='my-2'>
+                            <button
+                                type="submit"
+                                className={`w-full py-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={loading}
+                            >
+                                Login
+                            </button>
+                        </div>
+                }
                 <div className='my-2'>
                     <button
                         type="button"
-                        className={`w-full py-2 text-white bg-primary rounded hover:bg-hover! ${'opacity-50 cursor-not-allowed'}`}
-                        disabled
-                        onClick={registerHandler}
+                        className={`w-full py-2`}
+                        onClick={() => setShowRegisterForm((pre) => !pre)}
                     >
-                        New User? Register
+                        {showRegisterForm ? 'Back to Login' : 'New User? Register'}
                     </button>
                 </div>
-                {authMessage.length > 0 &&
+                {authMessage.externalMessage.length > 0 &&
                     <div className='mt-4'>
-                        <label className='py-2 bg-warning p-2 rounded-md'>
-                            {authMessage}
+                        <label className={`py-2 ${classes[authMessage.result]} p-2 rounded-md`}>
+                            {authMessage.externalMessage}
                         </label>
                     </div>
                 }
 
             </form>
-        </CardComponent>
+        </CardComponent >
     );
 }
 

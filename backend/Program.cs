@@ -50,6 +50,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 
+builder.Services.AddSingleton<SqliteInitializer>();
+
+builder.Services.AddSingleton<DatabaseUtility>();
 
 var app = builder.Build();
 
@@ -98,7 +101,14 @@ app.MapGet("/api/nonce", (HttpContext context) =>
 
 app.MapControllers();
 
-app.MapGet("/api/sayhello", () => Results.Json(new {msg = "Hello from ASP.NET 8 API!"}));
+app.MapGet("/api/sayhello", () => Results.Json(new { msg = "Hello from ASP.NET 8 API!" }));
+
+// Run database initializer at startup
+using (var scope = app.Services.CreateScope())
+{
+    var sqliteInitializer = scope.ServiceProvider.GetRequiredService<SqliteInitializer>();
+    sqliteInitializer.Initialize();
+}
 
 app.Run();
 
