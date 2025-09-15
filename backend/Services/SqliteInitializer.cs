@@ -9,8 +9,24 @@ public class SqliteInitializer
     }
     public void Initialize()
     {
-        using var connection = new SqliteConnection(_connectionString);
+        var connection = new SqliteConnection(_connectionString);
         connection.Open();
+
+        // enable foreign key enforcement
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA foreign_keys = ON;";
+            cmd.ExecuteNonQuery();
+        }
+
+        CreateUserTable(connection);
+        CreateMappingTable(connection);
+        CreateDataTypeTable(connection);
+        CreateMappingDetailTable(connection);
+    }
+
+    private void CreateUserTable(SqliteConnection connection)
+    {
         using var command = connection.CreateCommand();
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS Users (
@@ -21,4 +37,59 @@ public class SqliteInitializer
         ";
         command.ExecuteNonQuery();
     }
+
+    private void CreateMappingTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Mappings (
+                MappingId INTEGER PRIMARY KEY AUTOINCREMENT,
+                Description TEXT NOT NULL,
+                CreatedDate TEXT CURRENT_TIMESTAMP,
+                CreatedBy TEXT NOT NULL,
+                FOREIGN KEY (CreatedBy) REFERENCES Users(Id)
+            );
+        ";
+        command.ExecuteNonQuery();
+    }
+
+    private void CreateDataTypeTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS DataTypes (
+                DataTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
+                TypeName TEXT NOT NULL UNIQUE
+            );
+
+            INSERT OR IGNORE INTO DataTypes (TypeName) 
+            VALUES 
+                ('String'), 
+                ('Integer'), 
+                ('Float'), 
+                ('Boolean'), 
+                ('Date'), 
+                ('DateTime');
+        ";
+        command.ExecuteNonQuery();
+    }
+
+    private void CreateMappingDetailTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS MappingDetails (
+                MappingDetailId INTEGER PRIMARY KEY AUTOINCREMENT,
+                OrdinalPosition INTEGER,
+                MutationJSON TEXT,
+                OutputName TEXT NOT NULL,
+                OutputDataTypeId INTEGER NOT NULL,
+                MappingId INTEGER NOT NULL,
+                FOREIGN KEY (OutputDataTypeId) REFERENCES DataTypes(DataTypeId),
+                FOREIGN KEY (MappingId) REFERENCES Mappings(MappingId)
+            );
+        ";
+        command.ExecuteNonQuery();
+    }
+    
 }

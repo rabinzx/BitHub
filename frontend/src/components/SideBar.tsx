@@ -1,4 +1,5 @@
 import styles from './SideBar.module.css';
+import { Link } from 'react-router-dom';
 
 interface SideBarProps {
   isSidebarOpen?: boolean;
@@ -12,18 +13,10 @@ const SideBar: React.FC<SideBarProps> = ({ isSidebarOpen }) => {
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
       <nav className="space-y-4">
-        <a href="#" >
-          Home
-        </a>
-        <a href="#" >
-          About
-        </a>
-        <a href="#" >
-          Services
-        </a>
-        <a href="#" >
-          Contact
-        </a>
+        <Link to="/main">Dashboard</Link>
+        <Link to="/mappings">Mappings</Link>
+        <Link to="/routines">Routines</Link>
+        <Link to="/TBA">TBA</Link>
       </nav>
     </aside>
   );

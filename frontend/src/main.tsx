@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { store, persistor } from '@/store/store.ts';
 import { PersistGate } from 'redux-persist/integration/react';
 import ProtectedRoute from './pages/ProtectedRoute.tsx'
+import MappingForm from './pages/MappingForm.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
               <Route index element={<LoginForm />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="main" element={<MainCanvas />} />
+                <Route path="mappings" element={<MappingForm />} />
                 <Route path="sidepage" element={<SidePage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />

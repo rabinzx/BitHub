@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 public interface ICryptography
 {
-    string GenerateJwtToken(string username);
+    string GenerateJwtToken(int id, string username);
     string HashPassword(string password);
     bool VerifyPassword(string hashedPassword, string inputPassword);
 }
@@ -20,11 +20,12 @@ public class Cryptography : ICryptography
         _configuration = configuration;
     }
 
-    public string GenerateJwtToken(string username)
+    public string GenerateJwtToken(int id, string username)
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, username),
+            new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+            new Claim(ClaimTypes.Name, username),  
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
