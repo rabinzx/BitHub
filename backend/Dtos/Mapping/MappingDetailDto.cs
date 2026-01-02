@@ -8,4 +8,15 @@ namespace BitHub.Backend.Dtos
         public string OutputName { get; set; } = string.Empty;
         public int OutputDataTypeId { get; set; }
     }
+    public class MappingDetailWithMappingIdDto : MappingDetailDto
+    {
+        public int MappingId { get; set; }
+    }
+
+    public class MappingDetailPayloadDto
+    {
+        public int MappingId { get; set; }
+        public List<MappingDetailDto> MappingDetails { get; set; } = new();
+    }
+
 }

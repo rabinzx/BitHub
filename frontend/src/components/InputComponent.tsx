@@ -10,8 +10,13 @@ import rules, { getFileSizeMB } from '../InputRules';
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 
+export type InputType =
+    | 'text' | 'integer' | 'decimal' | 'zip' | 'date'
+    | 'phone' | 'checkbox' | 'file'
+    | 'password' | 'radio';
+
 interface InputProps {
-    type: string;
+    type: InputType;
     value: string | number | boolean | File | null;
     onChange: (value: string | number | boolean) => void;
     register?: UseFormRegister<FieldValues>;
@@ -64,7 +69,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
             tempVal = Number(parseFloat(event.target.value).toFixed(2));
             if (isNaN(tempVal as number)) return;
         }
-        else if (props.type === 'checkbox' || props.type === 'checkbox2') {
+        else if (props.type === 'checkbox' || props.type === 'radio') {
             tempVal = event.target.checked;
         }
         else if (props.type === 'file') {

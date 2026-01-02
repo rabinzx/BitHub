@@ -1,14 +1,16 @@
 import styles from './SideBar.module.css';
 import { Link } from 'react-router-dom';
+import { forwardRef } from 'react';
 
 interface SideBarProps {
   isSidebarOpen?: boolean;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ isSidebarOpen }) => {
+const SideBar = forwardRef<HTMLElement, SideBarProps>(({ isSidebarOpen }, ref) => {
   return (
     /* Sidebar */
     <aside
+      ref={ref}
       className={`${styles.sidebar} relative z-50 w-[250px] flex-shrink-0 transform transition-transform duration-250 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
@@ -20,6 +22,6 @@ const SideBar: React.FC<SideBarProps> = ({ isSidebarOpen }) => {
       </nav>
     </aside>
   );
-};
+});
 
 export default SideBar;

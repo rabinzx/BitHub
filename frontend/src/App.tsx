@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet, useNavigate } from "react-router-dom";
 import './App.css'
 import ThemeSelect from './components/ThemeSelect';
@@ -14,9 +14,10 @@ function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userInfo = useSelector((state: RootState) => state.auth.userInfo);
+  const sidebarRef = useRef<HTMLElement | null>(null);
 
   const sidebarOpenHandler = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((prev) => !prev);
   }
 
   useEffect(() => {
@@ -30,6 +31,24 @@ function App() {
       //analytics.page();
     }
   }, [nonce]);
+
+  useEffect(() => {
+    /**
+     * Alert if clicked on outside of element
+     */
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (sidebarRef.current && !sidebarRef.current.contains(target)) {
+        setIsSidebarOpen(false);
+      }
+    }
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarRef]);
 
   const logOffHandler = () => {
     dispatch(clearUserInfo());
@@ -62,7 +81,7 @@ function App() {
 
       {/* Layout Wrapper */}
       <div className="flex flex-1" >
-        <SideBar isSidebarOpen={isSidebarOpen} />
+        <SideBar isSidebarOpen={isSidebarOpen} ref={sidebarRef} />
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-250 p-6 -ml-[250px] ${isSidebarOpen && "md:ml-0"}`}>
           {/* Route outlet */}

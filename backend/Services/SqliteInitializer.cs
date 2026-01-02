@@ -23,6 +23,8 @@ public class SqliteInitializer
         CreateMappingTable(connection);
         CreateDataTypeTable(connection);
         CreateMappingDetailTable(connection);
+        CreateIntervalTable(connection);
+        CreateRoutineTable(connection);
     }
 
     private void CreateUserTable(SqliteConnection connection)
@@ -91,5 +93,49 @@ public class SqliteInitializer
         ";
         command.ExecuteNonQuery();
     }
+
+    private void CreateIntervalTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Intervals (
+                IntervalId INTEGER PRIMARY KEY AUTOINCREMENT,
+                IntervalName TEXT NOT NULL UNIQUE,
+                IntervalDetailDefaultJSON TEXT
+            );
+        ";
+        command.ExecuteNonQuery();
+
+        command.CommandText = @"
+            INSERT INTO Intervals (IntervalName, IntervalDetailDefaultJSON) 
+            VALUES
+                ('Hourly', '{" + "\"hour\":1" + @"}'),
+                ('Daily', '{" + "\"day\":1" + @"}}'),
+                ('Weekly', '{" + "\"week\":1,\"dayOfWeek\":[]" + @"}'),
+                ('Monthly', '{" + "\"month\":[],\"dayOfMonth\":[]" + @"}')
+            ON CONFLICT (IntervalName) DO UPDATE SET 
+                IntervalDetailDefaultJSON = excluded.IntervalDetailDefaultJSON;
+        ";
+        command.ExecuteNonQuery();
+    }
     
+    private void CreateRoutineTable(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Routines (
+                RoutineId INTEGER PRIMARY KEY AUTOINCREMENT,
+                RoutineName TEXT NOT NULL,
+                IntervalId INTEGER NOT NULL,
+                IntervalDetailJSON TEXT,
+                CreatedDate TEXT CURRENT_TIMESTAMP,
+                CreatedBy TEXT NOT NULL,
+                UpdatedDate TEXT NOT NULL,
+                UpdatedBy TEXT NOT NULL,
+                FOREIGN KEY (IntervalId) REFERENCES Intervals(IntervalId),
+                FOREIGN KEY (CreatedBy) REFERENCES Users(Id)
+            );
+        ";
+        command.ExecuteNonQuery();
+    }
 }

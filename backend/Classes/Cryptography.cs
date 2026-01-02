@@ -15,9 +15,11 @@ public interface ICryptography
 public class Cryptography : ICryptography
 {
     private readonly IConfiguration _configuration;
-    public Cryptography(IConfiguration configuration)
+    private readonly IHostEnvironment _env;
+    public Cryptography(IConfiguration configuration, IHostEnvironment env)
     {
         _configuration = configuration;
+        _env = env;
     }
 
     public string GenerateJwtToken(int id, string username)
@@ -36,7 +38,7 @@ public class Cryptography : ICryptography
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Issuer"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddMinutes(_env?.IsDevelopment() ?? false ?  360 : 30),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

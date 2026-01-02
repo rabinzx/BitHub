@@ -9,7 +9,7 @@ public class DatabaseUtility
         _connectionString = configuration.GetConnectionString("ConfigDb") ?? "Data Source=ConfigDb.db";
     }
 
-    private SqliteConnection GetConnection() => new SqliteConnection(_connectionString);
+    public SqliteConnection GetConnection() => new SqliteConnection(_connectionString);
 
     public async Task<IEnumerable<object>> QueryAsync(string query, object? parameters = null)
     {
@@ -65,5 +65,12 @@ public class DatabaseUtility
         return result;
     }
     
+    public async Task ExecuteAsync(string query, object? parameters = null)
+    {
+        using var conn = GetConnection();
+
+        var result = await conn.ExecuteAsync(
+            query, parameters);
+    }
     
 }

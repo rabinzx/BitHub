@@ -81,6 +81,9 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
 
     // Effect to reset the current page when the table rows change
     const currentRows = useMemo(() => {
+        if (!allowPaginaton) {
+            return tableRows;
+        }
         return tableRows.slice((currentPage - 1) * currentPageSize, currentPage * currentPageSize);
     }, [currentPageSize, currentPage, tableRows]);
 
