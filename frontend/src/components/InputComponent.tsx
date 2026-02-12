@@ -11,7 +11,7 @@ dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 
 export type InputType =
-    | 'text' | 'integer' | 'decimal' | 'zip' | 'date'
+    | 'text' | 'integer' | 'decimal' | 'zip' | 'date' | 'time'
     | 'phone' | 'checkbox' | 'file'
     | 'password' | 'radio';
 
@@ -177,7 +177,7 @@ const InputComponent: React.FC<InputProps> = (props) => {
         <div className={`flex items-center ${layout} ${props.className?.container} `}>
             {
                 (props.displayLabel === undefined ? true : props.displayLabel) &&
-                <label className={`text-xl font-bold ${layout === LayoutDirections.Col ? 'my-2' : 'mx-2'} ${props.className?.label}`} htmlFor={sanatizedName}>{props.name}</label>
+                <label className={`font-bold ${layout === LayoutDirections.Col ? 'my-2' : 'mx-2'} ${props.className?.label}`} htmlFor={sanatizedName}>{props.name}</label>
             }
 
             <div className={"text-left"}>
@@ -219,6 +219,18 @@ const InputComponent: React.FC<InputProps> = (props) => {
                         onChange={inputChangeHandler}
                     >
                         <input type="tel" id={sanatizedName} placeholder='MM/dd/yyyy' className={`${props.className?.input}`} />
+                    </InputMask>
+                }
+
+                {
+                    props.type === 'time' &&
+                    <InputMask
+                        mask="99:99"
+                        {...registerProps}
+                        value={inputValue}
+                        onChange={inputChangeHandler}
+                    >
+                        <input type="tel" id={sanatizedName} placeholder='HH:mm' className={`${props.className?.input}`} />
                     </InputMask>
                 }
 
