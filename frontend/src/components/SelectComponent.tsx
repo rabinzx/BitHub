@@ -60,9 +60,9 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                 Object.keys(options[0])[0];
             return selectedItemIndexes.map((index) => ((options[index] as Record<string, any>)[labelField])).join(', ');
         } else {
-            return selectedItemIndexes.map((index) => ('label' in options[index] ? options[index].label : '')).join(', ');
+            return selectedItemIndexes.map((index) => (options.length > index && 'label' in options[index] ? options[index].label : '')).join(', ');
         }
-    }, [selectedItemIndexes]);
+    }, [selectedItemIndexes, options]);
 
     // Register handleClickOutside event listener to close the dropdown when clicking outside of it
     useEffect(() => {

@@ -45,28 +45,64 @@ public class RoutineController : ControllerBase
     [Authorize]
     public async Task<IActionResult> SaveRoutine(RoutineDto routine)
     {
-        // INSERT
-        var insertSql = @"
-            INSERT INTO Routines
-                (RoutineName, IntervalId, SourcePath, SQLConnectionString, StartTime, StartDate, EndDate, CreatedDate, CreatedBy, UpdatedDate, UpdatedBy)
-            VALUES
-                (@RoutineName, @IntervalId, @SourcePath, @SQLConnectionString, @StartTime, @StartDate, @EndDate, CURRENT_TIMESTAMP, @CreatedBy, CURRENT_TIMESTAMP, @UpdatedBy);
-        ";
-
-        var parameters = new
+        if (routine.RoutineId == 0)
         {
-            RoutineName = routine.RoutineName,
-            IntervalId = routine.IntervalId,
-            SourcePath = routine.SourcePath,
-            SQLConnectionString = routine.SQLConnectionString,
-            StartTime = routine.StartTime,
-            StartDate = routine.StartDate,
-            EndDate = routine.EndDate,
-            CreatedBy = User.FindFirstValue(JwtRegisteredClaimNames.Sub),
-            UpdatedBy = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
-        };
+            // INSERT
+            var insertSql = @"
+                INSERT INTO Routines
+                    (RoutineName, IntervalId, SourcePath, SQLConnectionString, StartTime, StartDate, EndDate, CreatedDate, CreatedBy, UpdatedDate, UpdatedBy)
+                VALUES
+                    (@RoutineName, @IntervalId, @SourcePath, @SQLConnectionString, @StartTime, @StartDate, @EndDate, CURRENT_TIMESTAMP, @CreatedBy, CURRENT_TIMESTAMP, @UpdatedBy);
+            ";
 
-        await _databaseUtility.ExecuteAsync(insertSql, parameters);
+            var parameters = new
+            {
+                RoutineName = routine.RoutineName,
+                IntervalId = routine.IntervalId,
+                SourcePath = routine.SourcePath,
+                SQLConnectionString = routine.SQLConnectionString,
+                StartTime = routine.StartTime,
+                StartDate = routine.StartDate,
+                EndDate = routine.EndDate,
+                CreatedBy = User.FindFirstValue(JwtRegisteredClaimNames.Sub),
+                UpdatedBy = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            };
+
+            await _databaseUtility.ExecuteAsync(insertSql, parameters);
+            
+        } else
+        {
+            // UPDATE
+            var updateSql = @"
+                UPDATE Routines
+                SET RoutineName = @RoutineName,
+                    IntervalId = @IntervalId,
+                    SourcePath = @SourcePath,
+                    SQLConnectionString = @SQLConnectionString,
+                    StartTime = @StartTime,
+                    StartDate = @StartDate,
+                    EndDate = @EndDate,
+                    UpdatedDate = CURRENT_TIMESTAMP,
+                    UpdatedBy = @UpdatedBy
+                WHERE RoutineId = @RoutineId;
+            ";
+
+            var parameters = new
+            {
+                RoutineId = routine.RoutineId,
+                RoutineName = routine.RoutineName,
+                IntervalId = routine.IntervalId,
+                SourcePath = routine.SourcePath,
+                SQLConnectionString = routine.SQLConnectionString,
+                StartTime = routine.StartTime,
+                StartDate = routine.StartDate,
+                EndDate = routine.EndDate,
+                UpdatedBy = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            };
+
+            await _databaseUtility.ExecuteAsync(updateSql, parameters);
+        }
+        
         return Ok("Routine saved successfully.");
     }
 }
