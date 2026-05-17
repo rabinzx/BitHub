@@ -1,4 +1,5 @@
 using System.Text.Json;
+using BitHub.Backend.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,10 +33,10 @@ public class AuthController : ControllerBase
             string username = usernameProp.GetString() ?? "";
             string password = passwordProp.GetString() ?? "";
 
-            var query = "SELECT Password FROM Users WHERE UserName = @UserName LIMIT 1;";
-            var hashedPassword = await _databaseUtility.QuerySingleOrDefaultAsync<string>(query, new { UserName = username });
+            var query = "SELECT Id, Username, Password FROM Users WHERE UserName = @UserName LIMIT 1;";
+            var user = await _databaseUtility.QuerySingleOrDefaultAsync<UserDto>(query, new { UserName = username });
             
-            if (string.IsNullOrEmpty(hashedPassword))
+            if (user == null)
             {
                 result = new
                 {
@@ -45,11 +46,11 @@ public class AuthController : ControllerBase
                 return Ok(result);
             }
 
-            var isAuthenticated = _cryptography.VerifyPassword(hashedPassword, password);
+            var isAuthenticated = _cryptography.VerifyPassword(user.Password, password);
             if (isAuthenticated)
             {
                 // Generate JWT token
-                string token = _cryptography.GenerateJwtToken(username);
+                string token = _cryptography.GenerateJwtToken(user.Id, user.UserName);
                 int exipres_in_hours = 1; // Token expiration time in hours
                 var cookieOptions = new CookieOptions
                 {

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -33,6 +34,7 @@ builder.Services.AddScoped<ICryptography, Cryptography>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false; // preserve original claim types like "sub" (To prevent Microsoft.Identity override claim types https://stackoverflow.com/a/61900842)
         var jwtSection = builder.Configuration.GetSection("Jwt");
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -53,6 +55,12 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<SqliteInitializer>();
 
 builder.Services.AddSingleton<DatabaseUtility>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 var app = builder.Build();
 
@@ -100,8 +108,6 @@ app.MapGet("/api/nonce", (HttpContext context) =>
 });
 
 app.MapControllers();
-
-app.MapGet("/api/sayhello", () => Results.Json(new { msg = "Hello from ASP.NET 8 API!" }));
 
 // Run database initializer at startup
 using (var scope = app.Services.CreateScope())

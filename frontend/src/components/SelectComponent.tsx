@@ -17,14 +17,21 @@ interface SelectComponentProps {
     comboBoxLabelField?: string;
     typeToSearch?: boolean;
     onChange: (value: AllowedCellValue) => void;
+    selectedIndex?: number;
 }
 
-const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, typeToSearch, onChange }) => {
+const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder, disabled, maxDisplayItems, allowMultiple, className, maxDropdownHeightInPX, isComboBox, comboBoxLabelField, typeToSearch, onChange, selectedIndex }) => {
     // state to manage select-all checkbox
     const [selectedAll, setSelectedAll] = React.useState(false);
 
     // state to manage a list of indexes of selected items
     const [selectedItemIndexes, setSelectedItemIndexes] = React.useState<Array<number>>([]);
+    useEffect(() => {
+        if (selectedIndex !== undefined) {
+            setSelectedItemIndexes([selectedIndex])
+        }
+    }, [selectedIndex]);
+
 
     // Array of booleans to track checked state of each option
     const [optionsChecked, setOptionsChecked] = React.useState<Array<boolean>>(new Array(options.length).fill(false));
@@ -53,9 +60,9 @@ const SelectComponent: React.FC<SelectComponentProps> = ({ options, placeholder,
                 Object.keys(options[0])[0];
             return selectedItemIndexes.map((index) => ((options[index] as Record<string, any>)[labelField])).join(', ');
         } else {
-            return selectedItemIndexes.map((index) => ('label' in options[index] ? options[index].label : '')).join(', ');
+            return selectedItemIndexes.map((index) => (options.length > index && 'label' in options[index] ? options[index].label : '')).join(', ');
         }
-    }, [selectedItemIndexes]);
+    }, [selectedItemIndexes, options]);
 
     // Register handleClickOutside event listener to close the dropdown when clicking outside of it
     useEffect(() => {

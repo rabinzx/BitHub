@@ -1,0 +1,22 @@
+namespace BitHub.Backend.Dtos
+{
+    public class MappingDetailDto
+    {
+        public int MappingDetailId { get; set; }
+        public int OrdinalPosition { get; set; }
+        public string MutationJSON { get; set; } = string.Empty;
+        public string OutputName { get; set; } = string.Empty;
+        public int OutputDataTypeId { get; set; }
+    }
+    public class MappingDetailWithMappingIdDto : MappingDetailDto
+    {
+        public int MappingId { get; set; }
+    }
+
+    public class MappingDetailPayloadDto
+    {
+        public int MappingId { get; set; }
+        public List<MappingDetailDto> MappingDetails { get; set; } = new();
+    }
+
+}

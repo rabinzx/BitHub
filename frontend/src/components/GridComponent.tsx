@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useMemo, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, Bars3Icon, BarsArrowDownIcon, BarsArrowUpIcon } from '@heroicons/react/24/solid'
 import dayjs, { Dayjs } from 'dayjs';
 import { AllowedCellValue, SortOrder, SortOrderDict } from "@/types";
@@ -15,9 +15,10 @@ interface GridComponentProps {
     renderHeaderCell?: (header: string, headerIndex: number) => React.ReactNode;
     renderRow?: (row: Array<AllowedCellValue>, rowIndex: number) => React.ReactNode;
     renderCell?: (cell: AllowedCellValue, headerName: string, rowIndex: number, cellIndex: number, row: Array<AllowedCellValue>) => React.ReactNode;
+    onRowClick?: (row: AllowedCellValue[], rowIndex: number) => void;
 }
 
-const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderRow, renderCell }) => {
+const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSorting, columnWidth, allowPaginaton, allowPageSizeChange, pageSize, className, renderHeaderCell, renderRow, renderCell, onRowClick }) => {
     // State to manage the table headers and rows
     const [tableHeaders, setTableHeaders] = useState(headers);
     useEffect(() => {
@@ -26,7 +27,11 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
 
     const [tableRows, setTableRows] = useState(rows);
     useEffect(() => {
-        setTableRows(rows);
+        if (rows.length > 0) {
+            setTableRows(rows);
+        } else {
+            setTableRows([headers.map(() => '')]);
+        }
     }, [rows]);
 
     // Default page size
@@ -76,6 +81,9 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
 
     // Effect to reset the current page when the table rows change
     const currentRows = useMemo(() => {
+        if (!allowPaginaton) {
+            return tableRows;
+        }
         return tableRows.slice((currentPage - 1) * currentPageSize, currentPage * currentPageSize);
     }, [currentPageSize, currentPage, tableRows]);
 
@@ -145,7 +153,6 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
         }
     };
 
-
     return (
         <div className={`overflow-x-auto shadow-md rounded-md border ${className?.container}`} >
             <table className='border-collapse min-w-50 w-full '>
@@ -170,7 +177,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ headers, rows, columnSort
                     {currentRows.map((row, rowIndex) => (
                         // allow the parent to use default settings if renderRow(row, rowIndex) returns null
                         (renderRow && renderRow(row, rowIndex)) ??
-                        <tr key={rowIndex} className={`hover:bg-hover transition-colors duration-200 ${className?.cell}`}>
+                        <tr key={rowIndex} className={`hover:bg-hover transition-colors duration-200 ${className?.cell}`} onClick={() => onRowClick && onRowClick(row, rowIndex)} >
                             {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className='border p-2 overflow-x-auto'>
                                     {renderCell ?

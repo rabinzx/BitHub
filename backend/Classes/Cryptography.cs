@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 public interface ICryptography
 {
-    string GenerateJwtToken(string username);
+    string GenerateJwtToken(int id, string username);
     string HashPassword(string password);
     bool VerifyPassword(string hashedPassword, string inputPassword);
 }
@@ -15,16 +15,19 @@ public interface ICryptography
 public class Cryptography : ICryptography
 {
     private readonly IConfiguration _configuration;
-    public Cryptography(IConfiguration configuration)
+    private readonly IHostEnvironment _env;
+    public Cryptography(IConfiguration configuration, IHostEnvironment env)
     {
         _configuration = configuration;
+        _env = env;
     }
 
-    public string GenerateJwtToken(string username)
+    public string GenerateJwtToken(int id, string username)
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, username),
+            new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+            new Claim(ClaimTypes.Name, username),  
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -35,7 +38,7 @@ public class Cryptography : ICryptography
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Issuer"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddMinutes(_env?.IsDevelopment() ?? false ?  360 : 30),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
